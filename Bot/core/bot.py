@@ -5,6 +5,8 @@ import wavelink
 from CLogging import log
 from discord.ext import commands
 
+from .models import setup_db
+
 # get the relative path fo the folder called "cogs"
 COGS_PATH = path.join(path.dirname(__file__), "..", "cogs")
 
@@ -44,8 +46,7 @@ class CPObot(commands.Bot):
         )
         await wavelink.NodePool.connect(client=self, node=[node])
 
-    def run(
-        self, debug: bool = False, cogs: list[str] | None = None, sync: bool = False
-    ) -> None:
+    def run(self, cogs: list[str] | None = None) -> None:
         self.load_extensions(*cogs or self.get_cogs())
+        setup_db()
         super().run(environ.get("TOKEN"))
