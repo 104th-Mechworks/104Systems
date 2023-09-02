@@ -3,7 +3,7 @@
 
 import aiosqlite
 import discord
-from core import Cog, Context
+from core import Cog
 from discord.ext import commands
 
 

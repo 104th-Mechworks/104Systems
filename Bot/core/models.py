@@ -1,12 +1,13 @@
-import aiosqlite
-from core import CPObot
+import sqlite3
+
+# from .bot import CPObot
 
 
 # set up a database
-async def setup_db():
-    async with aiosqlite.connect("Battalion.sqlite") as db:
-        await db.execute(
-            """
+def setup_db():
+    db = sqlite3.connect("Battalion.sqlite")
+    db.execute(
+        """
             CREATE TABLE IF NOT EXISTS Brig (
 	            ID	INTEGER PRIMARY KEY NOT NULL UNIQUE,
 	            Type	TEXT NOT NULL,
@@ -18,9 +19,9 @@ async def setup_db():
                 roles  TEXT
             )
             """
-        )
-        await db.execute(
-            """
+    )
+    db.execute(
+        """
             CREATE TABLE IF NOT EXISTS Members (
 	            ID	INTEGER PRIMARY KEY NOT NULL UNIQUE,
 	            Name	TEXT UNIQUE,
@@ -32,9 +33,9 @@ async def setup_db():
 	            Squad	TEXT
             )
             """
-        )
-        await db.execute(
-            """
+    )
+    db.execute(
+        """
             CREATE TABLE IF NOT EXISTS Sshop (
                 ID INTEGER PRIMARY KEY NOT NULL UNIQUE,
 	            BHQ	TEXT,
@@ -42,9 +43,9 @@ async def setup_db():
 	            ST TEXT
             )
             """
-        )
-        await db.execute(
-            """
+    )
+    db.execute(
+        """
             CREATE TABLE IF NOT EXISTS KMC (
 	            ID	INTEGER PRIMARY KEY NOT NULL UNIQUE,
 	            Quals	TEXT,
@@ -54,15 +55,6 @@ async def setup_db():
 	            Cadre	TEXT
             )   
             """
-        )
-        await db.commit()
-    for guild in CPObot.guilds:
-        await db.execute(
-            f"""
-			CREATE TABLE IF NOT EXISTS {guild.id} (
-	            ID	INTEGER PRIMARY KEY NOT NULL UNIQUE,
-	            
-			)
-			"""
-        )
-    await db.close()
+    )
+    db.commit()
+    db.close()
