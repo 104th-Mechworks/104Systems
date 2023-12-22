@@ -164,3 +164,4 @@ lavalink.json
 main.sqlite
 logs/
 config.sqlite
+.idea

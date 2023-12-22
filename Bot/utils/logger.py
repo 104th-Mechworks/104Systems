@@ -72,12 +72,12 @@ setattr(logger, 'success', lambda message, *args: logger._log(logging.SUCCESS, m
 
 if not Path("logs").exists():
     os.mkdir("logs")
-if len(os.listdir("logs")) > 7:
+if len(os.listdir("logs")) > 0:
     for file in os.listdir("logs"):
         os.remove("logs/" + file)
         break
 
-log_path = f"logs/{logger.name} {datetime.datetime.now().strftime('%Y-%m-%d')}.log"
+log_path = f"logs/{logger.name}.log"
 file_format = logging.Formatter(
     "[{levelname:^9}] [{asctime}] [{name}] [{module:^4}:{lineno:^4}] | {message}",
     style="{",

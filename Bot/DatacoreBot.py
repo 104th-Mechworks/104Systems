@@ -14,7 +14,7 @@ load_dotenv()
 
 intents = discord.Intents.all()
 # log = logging.getLogger("Datacore")
-
+log.setLevel(logging.DEBUG)
 
 class DatacoreBot(commands.Bot):
     def __init__(self, *args, **kwargs):
