@@ -5,7 +5,7 @@ from discord.ext import commands
 import aiosqlite
 from discord.commands import option
 
-from Bot.cogs.medbay import connect_to_db
+from Bot.utils.DB import connect_to_db, close_db
 
 
 async def company_autocomplete(ctx: discord.AutocompleteContext):
@@ -76,6 +76,7 @@ class Data(commands.Cog):
                 rank: str = CT[0]
                 await cursor.execute(f"INSERT INTO members VALUES ({member.id}, '{rank}', '{name}', '{designation}', '{branch}', '{company}', '{platoon}', '{position}', {None})")
                 await db.commit()
+                await close_db(db, cursor)
             await ctx.send(f"Added {member.name} to the database")
         else:
             await ctx.send(f"{member.name} already exists in the database")

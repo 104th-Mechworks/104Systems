@@ -9,12 +9,12 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from Bot.utils.logger import logger as log
 
-
 load_dotenv()
 
 intents = discord.Intents.all()
 # log = logging.getLogger("Datacore")
 log.setLevel(logging.DEBUG)
+
 
 class DatacoreBot(commands.Bot):
     def __init__(self, *args, **kwargs):
@@ -86,15 +86,17 @@ bot = DatacoreBot(
     strip_after_prefix=True,
     intents=discord.Intents.all(),
     activity=discord.Activity(
-            type=discord.ActivityType.watching,
-            name="104th Battalion"
-        ),
+        type=discord.ActivityType.watching,
+        name="104th Battalion"
+    ),
     status=discord.Status.dnd
 )
 
 
 @bot.slash_command()
-async def reload(ctx: discord.ApplicationContext, extension: discord.Option(description="cog to reload", choices=["attendance", "brig", "info", "music", "level", "medbay"])):
+async def reload(ctx: discord.ApplicationContext, extension: discord.Option(description="cog to reload",
+                                                                            choices=["attendance", "brig", "info",
+                                                                                     "music", "level", "medbay"])):
     bot.reload_extension(f"cogs.{extension}")
     await ctx.respond(f"Reloaded {extension}")
 
