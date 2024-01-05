@@ -432,18 +432,28 @@ class Medbay(commands.Cog):
     async def history(self, ctx: discord.ApplicationContext, member: discord.Member):
         db, cursor = await connect_to_db()
         await cursor.execute(
+<<<<<<< HEAD
             f"SELECT Type, startDate, endDate, Reason, Status FROM medbay WHERE userID = {member.id} AND (Status = {2} OR Status = {4}) ORDER BY TicketID DESC LIMIT 25"
+=======
+            f"SELECT type, start_date, end_date, reason, status FROM medbay WHERE UserID = {member.id} AND (status = {2} OR status = {4} ORDER BY ID DESC LIMIT 25)"
+>>>>>>> c6850f3a87a8d392d9c81e27050df8045fcded29
         )
         result = await cursor.fetchall()
         await cursor.close()
         await db.close()
+<<<<<<< HEAD
         if result is None:
             await ctx.respond(f"No medbay history for {member.display_name}")
+=======
+        if result is None or not result:
+            await ctx.respond("No medbay history found", ephemeral=True)
+>>>>>>> c6850f3a87a8d392d9c81e27050df8045fcded29
             return
         else:
             embeds = []
 
             for item in result:
+<<<<<<< HEAD
                 lrs = "unknown"
                 if item[4] == 2:
                     lrs = "Returned"
@@ -457,10 +467,26 @@ class Medbay(commands.Cog):
                 embed.add_field(name="Duration", value=duration_calc(item[1], item[2]), inline=False)
                 embed.add_field(name="Reason", value=item[3], inline=False)
                 embed.add_field(name="Status", value=lrs, inline=False)
+=======
+                lrs = "Unknown"
+                if item[4] == 2:
+                    lrs = "On Time"
+                elif item[4] == 4:
+                    lrs = "Late"
+
+                embed = discord.Embed(title=f"Medbay History")
+                embed.add_field(name="Leave Type", value=item[0], inline=False)
+                embed.add_field(name="Leave Start", value=item[1], inline=False)
+                embed.add_field(name="Leave End", value=item[2], inline=False)
+                embed.add_field(name="Duration", value=duration_calc(item[1], item[2]), inline=False)
+                embed.add_field(name="Leave Reason", value=item[3], inline=False)
+                embed.add_field(name="Returned", value=lrs, inline=False)
+>>>>>>> c6850f3a87a8d392d9c81e27050df8045fcded29
                 embeds.append(embed)
 
             page_groups = []
             for i in range(len(embeds)):
+<<<<<<< HEAD
                 page = pages.PageGroup(pages=[embeds[i]], label=f"Request: {i + 1}", use_default_buttons=False, show_indicator=False, show_disabled=False)
                 page_groups.append(page)
             try:
@@ -468,6 +494,15 @@ class Medbay(commands.Cog):
                 await paginator.respond(ctx.interaction)
             except ValueError:
                 await ctx.respond("No medbay history for this member")
+=======
+                page = pages.PageGroup(pages=[embeds[i]], label=f"Request: {i + 1}", use_default_buttons=False)
+                page_groups.append(page)
+            try:
+                paginator = pages.Paginator(pages=page_groups, use_default_buttons=False, show_indicator=False, show_menu=True, timeout=300, menu_placeholder="Select a request")
+                await paginator.respond(ctx.interaction, ephemeral=False)
+            except ValueError:
+                await ctx.respond("No history found")
+>>>>>>> c6850f3a87a8d392d9c81e27050df8045fcded29
             return
 
 
