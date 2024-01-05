@@ -485,48 +485,43 @@ class Medbay(commands.Cog):
     async def history(self, ctx: discord.ApplicationContext, member: discord.Member):
         db, cursor = await connect_to_db()
         await cursor.execute(
-            f"SELECT type, start_date, end_date, reason, status FROM medbay WHERE UserID = {member.id} AND (status = {2} OR status = {4})"
+            f"SELECT type, start_date, end_date, reason, status FROM medbay WHERE UserID = {member.id} AND (status = {2} OR status = {4} ORDER BY ID DESC LIMIT 25)"
         )
         result = await cursor.fetchall()
         await cursor.close()
         await db.close()
-        embeds = []
+        if result is None or not result:
+            await ctx.respond("No medbay history found", ephemeral=True)
+            return
+        else:
+            embeds = []
 
-        for item in result:
-            lrs = "Unknown"
-            if item[4] == 2:
-                lrs = "On Time"
-            elif item[4] == 4:
-                lrs = "Late"
+            for item in result:
+                lrs = "Unknown"
+                if item[4] == 2:
+                    lrs = "On Time"
+                elif item[4] == 4:
+                    lrs = "Late"
 
-            embed = discord.Embed(title=f"Medbay History")
-            embed.add_field(name="Leave Type", value=item[0], inline=False)
-            embed.add_field(name="Leave Start", value=item[1], inline=False)
-            embed.add_field(name="Leave End", value=item[2], inline=False)
-            embed.add_field(name="Duration", value=duration_calc(item[1], item[2]), inline=False)
-            embed.add_field(name="Leave Reason", value=item[3], inline=False)
-            embed.add_field(name="Returned", value=lrs, inline=False)
-            embeds.append(embed)
-        try:
-            paginator = pages.Paginator(pages=embeds, use_default_buttons=False)
-            paginator.add_button(
-                PaginatorButton("prev", label="<", style=discord.ButtonStyle.grey)
-            )
-            paginator.add_button(
-                PaginatorButton(
-                    "page_indicator", style=discord.ButtonStyle.gray, disabled=True
-                )
-            )
-            paginator.add_button(
-                PaginatorButton("next", label=">", style=discord.ButtonStyle.gray)
-            )
-            paginator.add_button(
-                pages.PaginatorButton(
-                    "page_indicator", style=discord.ButtonStyle.gray, disabled=True
-                ))
-            await paginator.respond(ctx.interaction, ephemeral=False)
-        except ValueError:
-            await ctx.respond("No history found")
+                embed = discord.Embed(title=f"Medbay History")
+                embed.add_field(name="Leave Type", value=item[0], inline=False)
+                embed.add_field(name="Leave Start", value=item[1], inline=False)
+                embed.add_field(name="Leave End", value=item[2], inline=False)
+                embed.add_field(name="Duration", value=duration_calc(item[1], item[2]), inline=False)
+                embed.add_field(name="Leave Reason", value=item[3], inline=False)
+                embed.add_field(name="Returned", value=lrs, inline=False)
+                embeds.append(embed)
+
+            page_groups = []
+            for i in range(len(embeds)):
+                page = pages.PageGroup(pages=[embeds[i]], label=f"Request: {i + 1}", use_default_buttons=False)
+                page_groups.append(page)
+            try:
+                paginator = pages.Paginator(pages=page_groups, use_default_buttons=False, show_indicator=False, show_menu=True, timeout=300, menu_placeholder="Select a request")
+                await paginator.respond(ctx.interaction, ephemeral=False)
+            except ValueError:
+                await ctx.respond("No history found")
+            return
 
 
 def setup(bot: commands.Bot):
