@@ -1,19 +1,14 @@
 import os
 import datetime
-import aiosqlite
-
 import discord
 from discord import option
 from discord.ext import commands, tasks, pages
 from discord.ext.pages import Page, PaginatorButton
 
+from Bot.utils.DB import connect_to_db, close_db
+
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
-
-async def connect_to_db():
-    db = await aiosqlite.connect("main.sqlite")
-    cursor = await db.cursor()
-    return db, cursor
 
 
 async def fetch_or_get_role(guild: discord.Guild, role_id: int):
@@ -157,7 +152,7 @@ class MedbayRequestModal(discord.ui.Modal):
             )
         )
         await db.commit()
-        await db.close()
+        await close_db(db, cursor)
         await channel.send(
             embed=embed,
             view=SubmitButtons(),
@@ -187,8 +182,7 @@ class SubmitButtons(discord.ui.View):
         db, cursor = await connect_to_db()
         await cursor.execute(f"DELETE FROM medbay WHERE ChannelID = {interaction.channel.id}")
         await db.commit()
-        await cursor.close()
-        await db.close()
+        await close_db(db, cursor)
         await interaction.channel.delete()
 
 

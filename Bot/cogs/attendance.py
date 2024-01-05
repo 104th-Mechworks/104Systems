@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from Bot.DatacoreBot import DatacoreBot
 from Bot.utils.logger import logger as log
+from Bot.utils.DB import connect_to_db, close_db
 
 class ResetJSONManager:
     def __init__(self):
@@ -45,10 +46,7 @@ def reset_embed_generator(json_obj) -> discord.Embed:
     return embed
 
 
-async def connect_to_db():
-    db = await aiosqlite.connect("main.sqlite")
-    cursor = await db.cursor()
-    return db, cursor
+
 
 
 class Attendance(commands.Cog):
@@ -79,7 +77,7 @@ class Attendance(commands.Cog):
     @att.command(name="reset", description="Resets attendance for members in the server")
     async def _reset(self, ctx: discord.ApplicationContext):
         await ctx.defer()
-        db, cursor = await connect_to_db()
+        db, cursor = await connect_to_db("main.sqlite")
         await cursor.execute(f"SELECT attwatchrole FROM ServerConfig WHERE ServerID = {ctx.guild.id}")
         roleID = await cursor.fetchone()
         role = ctx.guild.get_role(roleID[0])
