@@ -418,8 +418,8 @@ class MusicPlayerCog(commands.Cog):
             return await ctx.response.send_message(f"You may not stop the player when you are not in the same channel.",
                                                    ephemeral=True, delete_after=10, )
         await player.teardown()
-        await player.controller.channel.send(
-            f"{ctx.author.display_name}#{ctx.author.discriminator} stopped the player.")
+        # await player.controller.channel.send(
+        #     f"{ctx.author.display_name}#{ctx.author.discriminator} stopped the player.")
         await ctx.response.send_message(f"You stopped the player.", ephemeral=True, delete_after=10)
 
     @music.command(name="pause", description="Pause the current song")

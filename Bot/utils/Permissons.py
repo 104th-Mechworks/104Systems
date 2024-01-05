@@ -1,0 +1,6 @@
+# ServerIDs
+BRANCH = []
+PLATOONS = []
+
+MAIN = []
+

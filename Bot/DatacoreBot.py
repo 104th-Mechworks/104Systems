@@ -7,6 +7,8 @@ import discord
 import pomice
 from discord.ext import commands
 from dotenv import load_dotenv
+
+from Bot.utils.DB import connect_to_db
 from Bot.utils.logger import logger as log
 
 load_dotenv()
@@ -73,6 +75,7 @@ class DatacoreBot(commands.Bot):
 
     async def on_ready(self) -> None:
         if self.first_start:
+            await self.wait_until_ready()
             log.success(
                 f"Bot started as {self.user.name}#{self.user.discriminator} | {self.user.id}"
             )
@@ -96,9 +99,27 @@ bot = DatacoreBot(
 @bot.slash_command()
 async def reload(ctx: discord.ApplicationContext, extension: discord.Option(description="cog to reload",
                                                                             choices=["attendance", "brig", "info",
-                                                                                     "music", "level", "medbay"])):
+                                                                                     "music", "level", "medbay", "data"])):
     bot.reload_extension(f"cogs.{extension}")
     await ctx.respond(f"Reloaded {extension}")
+
+
+@bot.slash_command()
+async def medbay_channel(ctx: discord.ApplicationContext, nffccategory: discord.CategoryChannel, loacategory: discord.CategoryChannel, nffcrole: discord.Role, loarole: discord.Role):
+    db, cursor = await connect_to_db()
+    await cursor.execute(f"SELECT ID FROM ServerConfig WHERE ID = {ctx.guild_id}")
+    result = await cursor.fetchone()
+    if result is None:
+        await cursor.execute(
+            f"INSERT INTO ServerConfig (ID, NFFCcat, NFFCr, LOAcat, LOAr) VALUES ({ctx.guild_id}, {nffccategory.id}, {nffcrole.id}, {loacategory.id}, {loarole.id})")
+    else:
+        await cursor.execute(
+            f"UPDATE ServerConfig SET NFFCcat = {nffccategory.id}, NFFCr = {nffcrole.id}, LOAcat = {loarole.id}, LOAr = {loarole.id} WHERE ID = {ctx.guild_id}")
+    await db.commit()
+    await cursor.close()
+    await db.close()
+    await ctx.respond(f"Updated {ctx.guild.name} medbay roles and categories", ephemeral=True)
+    return
 
 
 def pre_start():

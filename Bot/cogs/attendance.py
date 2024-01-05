@@ -7,6 +7,7 @@ from Bot.DatacoreBot import DatacoreBot
 from Bot.utils.logger import logger as log
 from Bot.utils.DB import connect_to_db, close_db
 
+
 class ResetJSONManager:
     def __init__(self):
         self.json_obj = {}
