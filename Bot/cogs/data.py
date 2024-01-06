@@ -43,7 +43,7 @@ async def company_autocomplete(ctx: discord.AutocompleteContext):
                 "13th Fighter Eagle's Talons Wing",
                 "42nd Midnight Ravens Squadron"
                 ]
-    elif branch == "Special Operations Forces":
+    elif branch == "Special Operations Force":
         return ["44th Special Operations Division"]
 
 
@@ -121,6 +121,7 @@ async def position_autocomplete(ctx: discord.AutocompleteContext):
 
         ]
     return rlist
+
 
 
 async def get_branch_colour(branch=None, rank=None) -> discord.Colour:
