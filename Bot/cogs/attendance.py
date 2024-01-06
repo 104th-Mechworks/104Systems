@@ -42,7 +42,8 @@ def reset_embed_generator(json_obj) -> discord.Embed:
 
     # Iterate through the dictionary and add each key/value pair to the embed
     for key, value in json_obj.items():
-        embed.add_field(name=key, value=", ".join(value), inline=False)
+        values = "\n".join(value)
+        embed.add_field(name=f"Attendance: {key}", value=values, inline=False)
 
     return embed
 
@@ -75,21 +76,38 @@ class Attendance(commands.Cog):
 
     att = discord.SlashCommandGroup(name="attendance", description="Commands for attendance")
 
+    @att.command(name="setup", description="Sets up attendance for the server")
+    async def _setup(self, ctx: discord.ApplicationContext, role: discord.Role, channel: discord.TextChannel):
+        db, cursor = await connect_to_db("main.sqlite")
+        await cursor.execute(f"SELECT AchannelID, attwatchrole FROM ServerConfig WHERE ID = {ctx.guild.id}")
+        result = await cursor.fetchone()
+        if result is None:
+            await cursor.execute(f"INSERT INTO ServerConfig (ID, AchannelID, attwatchrole) VALUES ({ctx.guild.id}, {channel.id}, {role.id})")
+        else:
+            await cursor.execute(f"UPDATE ServerConfig SET AchannelID = {channel.id}, attwatchrole = {role.id} WHERE ID = {ctx.guild.id}")
+        await db.commit()
+        await cursor.close()
+        await db.close()
+        await ctx.respond(f"Updated {ctx.guild.name} attendance channel and role", ephemeral=True)
+
     @att.command(name="reset", description="Resets attendance for members in the server")
     async def _reset(self, ctx: discord.ApplicationContext):
         await ctx.defer()
         db, cursor = await connect_to_db("main.sqlite")
-        await cursor.execute(f"SELECT attwatchrole FROM ServerConfig WHERE ServerID = {ctx.guild.id}")
+        await cursor.execute(f"SELECT attwatchrole FROM ServerConfig WHERE ID = {ctx.guild.id}")
         roleID = await cursor.fetchone()
+
         role = ctx.guild.get_role(roleID[0])
+        if role is None:
+            role = await ctx.guild._fetch_role(roleID[0])
+
         members = []
         attendance_result = ResetJSONManager()
-        if role is None:
-            role = await ctx.guild._fetch_role(roleID)
 
         for member in ctx.guild.members:
             if role in member.roles:
                 members.append(member)
+
         for member in members:
             async with db.execute(f'''
                 SELECT attendanceNum AS old_attendanceNum
@@ -98,6 +116,13 @@ class Attendance(commands.Cog):
                 LIMIT 1
             ''') as cursor:
                 previous_value = await cursor.fetchone()
+            # add member name to the dictionary where the key is the previous value
+            # if the key already exists add the member name to the list associated with the key
+            # if the key doesn't exist create a new list with the member name
+            # if previous_value[0] in reset:
+            #     reset[previous_value[0]].append(member.display_name)
+            # else:
+            #     reset[previous_value[0]] = [member.display_name]
 
             # Update the record and set the 'attendanceNum' field to 0
             await db.execute(f'''
@@ -105,6 +130,8 @@ class Attendance(commands.Cog):
                 SET attendanceNum = 0
                 WHERE ID = {member.id}
             ''')
+            if previous_value is None:
+                continue
 
             # Commit the changes
             await db.commit()

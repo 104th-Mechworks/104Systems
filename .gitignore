@@ -161,7 +161,7 @@ cython_debug/
 .github/
 .Lavalink/
 lavalink.json
-main.sqlite
 logs/
 config.sqlite
 .idea
+testing.ipynb

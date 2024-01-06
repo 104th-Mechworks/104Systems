@@ -85,7 +85,7 @@ async def position_autocomplete(ctx: discord.AutocompleteContext):
     rlist = []
     if branch == "Army":
         rlist = [
-            "Army Company Commander",
+            "Army Commanding Officer",
             "Army Executive Officer",
             "Head of Console",
             "Company Commanding Officer",
@@ -96,6 +96,7 @@ async def position_autocomplete(ctx: discord.AutocompleteContext):
             "Platoon Non-Commissioned Officer",
             "Squad Leader",
             "Squad Non-Commissioned Officer",
+            "Fireteam Leader",
             "CT"
         ]
     elif branch == "Starfighter Corps":
@@ -114,7 +115,7 @@ async def position_autocomplete(ctx: discord.AutocompleteContext):
     elif branch == "Fleet Command":
         rlist = [
             "Fleet Commanding Officer",
-            "Fleet Executive officer",
+            "Fleet Executive Officer",
             "Head of Disciplinary",
             "Disciplinary Officer"
 
@@ -194,27 +195,27 @@ class Data(commands.Cog):
     async def edit(self, ctx: discord.ApplicationContext, member: discord.Member, branch: str, company: str,
                    platoon: str, position: str):
         db, cursor = await connect_to_db()
-        base_query = "UPDATE Members SET"
+        query = "UPDATE Members SET "
         if branch is not None:
             if branch == "None":
                 branch = None
-            base_query += f"Branch = {branch}"
+            query += f"Branch = '{branch}',"
         if company is not None:
             if company == "None":
                 company = None
-            base_query += f"Company = {company}"
+            query += f"Company = '{company}',"
         if platoon is not None:
             if platoon == "None":
                 platoon = None
-            base_query += f"Company = {platoon}"
+            query += f"Company = '{platoon}',"
         if position is not None:
             if position == "None":
                 position = None
-            base_query += f"Position = {position}"
+            query += f"Position = '{position}',"
 
-        base_query += f" WHERE ID = {member.id}"
+        query = query.rstrip(",") + f" WHERE ID = {member.id}"
 
-        await cursor.execute(base_query)
+        await cursor.execute(query)
         await db.commit()
         await close_db(db, cursor)
         await ctx.respond(f"Updated {member.name}'s data", ephemeral=True)
