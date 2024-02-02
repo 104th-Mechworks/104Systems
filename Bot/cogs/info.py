@@ -1,8 +1,6 @@
 import logging
-
 import discord
 from discord.ext import commands
-
 from Bot.DatacoreBot import DatacoreBot
 
 log = logging.getLogger("Datacore")

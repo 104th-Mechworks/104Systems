@@ -5,44 +5,58 @@ from discord.commands import option
 from discord.ext import commands
 from Bot.DatacoreBot import DatacoreBot
 from Bot.utils.DB import connect_to_db, close_db
-from Bot.utils.data import company_name_switcher
-from Bot.utils.colours import ARMY_COLOUR, SFC_COLOUR, AUX_COLOUR, FLEET_COLOUR, ARC_COLOUR, RC_COLOUR
+from Bot.utils.data import company_name_switcher, rank_switcher
+from Bot.utils.colours import (
+    ARMY_COLOUR,
+    SFC_COLOUR,
+    AUX_COLOUR,
+    FLEET_COLOUR,
+    ARC_COLOUR,
+    RC_COLOUR,
+)
 from Bot.utils.regex import FULL
 
 
 async def company_autocomplete(ctx: discord.AutocompleteContext):
     branch = ctx.options["branch"]
     if branch == "Army":
-        return ["None",
-                "30th Ares Company",
-                "44th Reaper Company",
-                "82nd Havoc Company",
-                "62nd Monarch Company",
-                "29th Valkyrie Company",
-                "48th Rogue Company",
-                "34th Horizon Company",
-                "22nd Vanguard Company",
-                "60th Reconnaissance Company"]
+        return [
+            "None",
+            "30th Ares Company",
+            "44th Reaper Company",
+            "82nd Havoc Company",
+            "62nd Monarch Company",
+            "29th Valkyrie Company",
+            "48th Rogue Company",
+            "34th Horizon Company",
+            "22nd Vanguard Company",
+            "60th Reconnaissance Company",
+        ]
     elif branch == "Starfighter Corps":
-        return ["None", "1st Fighter Obsidian Owls Wing", "13th Fighter Eagle's Talons Wing",
-            "42nd Midnight Ravens Squadron", ]
+        return [
+            "None",
+            "1st Fighter Obsidian Owls Wing",
+            "13th Fighter Eagle's Talons Wing",
+            "42nd Midnight Ravens Squadron",
+        ]
     elif branch == "None":
         return ["None"]
     elif branch == "Fleet Command":
-        return ["None",
-                "30th Ares Company",
-                "44th Reaper Company",
-                "82nd Havoc Company",
-                "62nd Monarch Company",
-                "29th Valkyrie Company",
-                "48th Rogue Company",
-                "34th Horizon Company",
-                "22nd Vanguard Company",
-                "60th Reconnaissance Company",
-                "1st Fighter Obsidian Owls Wing",
-                "13th Fighter Eagle's Talons Wing",
-                "42nd Midnight Ravens Squadron"
-                ]
+        return [
+            "None",
+            "30th Ares Company",
+            "44th Reaper Company",
+            "82nd Havoc Company",
+            "62nd Monarch Company",
+            "29th Valkyrie Company",
+            "48th Rogue Company",
+            "34th Horizon Company",
+            "22nd Vanguard Company",
+            "60th Reconnaissance Company",
+            "1st Fighter Obsidian Owls Wing",
+            "13th Fighter Eagle's Talons Wing",
+            "42nd Midnight Ravens Squadron",
+        ]
     elif branch == "Special Operations Force":
         return ["44th Special Operations Division"]
 
@@ -97,7 +111,7 @@ async def position_autocomplete(ctx: discord.AutocompleteContext):
             "Squad Leader",
             "Squad Non-Commissioned Officer",
             "Fireteam Leader",
-            "CT"
+            "CT",
         ]
     elif branch == "Starfighter Corps":
         rlist = [
@@ -117,11 +131,9 @@ async def position_autocomplete(ctx: discord.AutocompleteContext):
             "Fleet Commanding Officer",
             "Fleet Executive Officer",
             "Head of Disciplinary",
-            "Disciplinary Officer"
-
+            "Disciplinary Officer",
         ]
     return rlist
-
 
 
 async def get_branch_colour(branch=None, rank=None) -> discord.Colour:
@@ -146,16 +158,50 @@ class Data(commands.Cog):
     def __init__(self, bot: DatacoreBot):
         self.bot = bot
 
-    data = discord.SlashCommandGroup(name="data", description="Data commands")
+    data = discord.SlashCommandGroup(
+        name="data", description="Data commands", guild_only=True
+    )
 
     @data.command(name="add", description="Add data to the database")
-    @option("branch", description="Branch the member belongs to",
-            choices=["Fleet Command", "Army", "Starfighter Corps", "Naval Auxiliary", "Special Operations Force"], required=True)
-    @option("company", description="Company the member belongs to", autocomplete=company_autocomplete, default=None)
-    @option("platoon", description="Platoon the member belongs to", autocomplete=platoon_autocomplete, default=None)
-    @option("position", description="Position the member holds", autocomplete=position_autocomplete, default=None)
-    async def _add(self, ctx: discord.ApplicationContext, member: discord.Member, branch: str, company: str,
-                  platoon: str, position: str):
+    @option(
+        "branch",
+        description="Branch the member belongs to",
+        choices=[
+            "Fleet Command",
+            "Army",
+            "Starfighter Corps",
+            "Naval Auxiliary",
+            "Special Operations Force",
+        ],
+        required=True,
+    )
+    @option(
+        "company",
+        description="Company the member belongs to",
+        autocomplete=company_autocomplete,
+        default=None,
+    )
+    @option(
+        "platoon",
+        description="Platoon the member belongs to",
+        autocomplete=platoon_autocomplete,
+        default=None,
+    )
+    @option(
+        "position",
+        description="Position the member holds",
+        autocomplete=position_autocomplete,
+        default=None,
+    )
+    async def _add(
+        self,
+        ctx: discord.ApplicationContext,
+        member: discord.Member,
+        branch: str,
+        company: str,
+        platoon: str,
+        position: str,
+    ):
         db, cursor = await connect_to_db()
         # pattern = r"^([A-Z0-9]{2,4}) ([A-Z][a-z]+) ([A-Z]{1,2}-(?:[0-9]+|(?:\d-\d+\/\d+)))$"
         await cursor.execute(f"SELECT ID FROM members WHERE ID = {member.id}")
@@ -174,27 +220,70 @@ class Data(commands.Cog):
                 company = await company_name_switcher(company)
                 try:
                     await cursor.execute(
-                    f"INSERT INTO Members (ID, Rank, Name, Designation, Branch, Company, Platoon, Position) VALUES ({member.id}, '{rank}', '{name}', '{designation}', '{branch}','{company}', '{platoon}', '{position}')")
-                    await cursor.execute(f"INSERT INTO attendance (ID, attendanceNum) VALUES ({member.id}, 0)")
+                        f"INSERT INTO Members (ID, Rank, Name, Designation, Branch, Company, Platoon, Position) VALUES ({member.id}, '{rank}', '{name}', '{designation}', '{branch}','{company}', '{platoon}', '{position}')"
+                    )
+                    await cursor.execute(
+                        f"INSERT INTO attendance (ID, attendanceNum) VALUES ({member.id}, 0)"
+                    )
                 except:
-                    await ctx.respond(f"Error adding {member.name} to the database", ephemeral=True)
+                    await ctx.respond(
+                        f"Error adding {member.name} to the database", ephemeral=True
+                    )
                 await db.commit()
                 await cursor.close()
                 await db.close()
-                await ctx.respond(f"Added {member.name} to the database", ephemeral=True)
+                await ctx.respond(
+                    f"Added {member.name} to the database", ephemeral=True
+                )
             else:
-                await ctx.respond(f"{member.name} does not have a valid CT name", ephemeral=True)
+                await ctx.respond(
+                    f"{member.name} does not have a valid CT name", ephemeral=True
+                )
         else:
-            await ctx.respond(f"{member.name} already exists in the database", ephemeral=True)
+            await ctx.respond(
+                f"{member.name} already exists in the database", ephemeral=True
+            )
 
     @data.command()
-    @option("branch", description="Branch the member belongs to",
-            choices=["Army", "Starfighter Corps", "Naval Auxiliary", "Special Operations Force", "Fleet Command", "None"])
-    @option("company", description="Company the member belongs to", autocomplete=company_autocomplete, default=None)
-    @option("platoon", description="Platoon the member belongs to", autocomplete=platoon_autocomplete, default=None)
-    @option("position", description="Position the member holds", autocomplete=position_autocomplete, default=None)
-    async def edit(self, ctx: discord.ApplicationContext, member: discord.Member, branch: str, company: str,
-                   platoon: str, position: str):
+    @option(
+        "branch",
+        description="Branch the member belongs to",
+        choices=[
+            "Army",
+            "Starfighter Corps",
+            "Naval Auxiliary",
+            "Special Operations Force",
+            "Fleet Command",
+            "None",
+        ],
+    )
+    @option(
+        "company",
+        description="Company the member belongs to",
+        autocomplete=company_autocomplete,
+        default=None,
+    )
+    @option(
+        "platoon",
+        description="Platoon the member belongs to",
+        autocomplete=platoon_autocomplete,
+        default=None,
+    )
+    @option(
+        "position",
+        description="Position the member holds",
+        autocomplete=position_autocomplete,
+        default=None,
+    )
+    async def edit(
+        self,
+        ctx: discord.ApplicationContext,
+        member: discord.Member,
+        branch: str,
+        company: str,
+        platoon: str,
+        position: str,
+    ):
         db, cursor = await connect_to_db()
         query = "UPDATE Members SET "
         if branch is not None:
@@ -221,22 +310,32 @@ class Data(commands.Cog):
         await close_db(db, cursor)
         await ctx.respond(f"Updated {member.name}'s data", ephemeral=True)
 
-
     @data.command(name="get", description="Get member from the database")
     async def _get(self, ctx: discord.ApplicationContext, member: discord.Member):
         db, cursor = await connect_to_db()
-        await cursor.execute(f"SELECT Rank, Name, Designation, Branch, Company, Platoon, Position FROM members WHERE ID = {member.id}")
+        await cursor.execute(
+            f"SELECT Members.Rank, Members.name, Members.Designation, Members.Branch, Members.Company, Members.Platoon, Members.Position, attendance.AttendanceNum FROM Members JOIN attendance ON Members.ID = attendance.ID WHERE Members.ID = {member.id}"
+        )
+
         rnd = await cursor.fetchone()
-        await cursor.execute(f"SELECT art_team, admin, event, vanguard_security, KSF FROM cshop WHERE ID = {member.id}")
+        await cursor.execute(
+            f"SELECT art_team, admin, event, vanguard_security, KSF FROM cshop WHERE ID = {member.id}"
+        )
         cshop = await cursor.fetchone()
-        await cursor.execute(f"SELECT rifleman, antiarmour, marksman, arf, aerial, SOF FROM quals WHERE ID = {member.id}")
+        await cursor.execute(
+            f"SELECT rifleman, antiarmour, marksman, arf, aerial, SOF FROM quals WHERE ID = {member.id}"
+        )
         kmc = await cursor.fetchone()
         await cursor.close()
         await db.close()
         display_name = f"{rnd[0]} {rnd[1]} {rnd[2]}"
         colour = await get_branch_colour(rnd[3], rnd[0])
         comp_name = await company_name_switcher(rnd[4])
-        rnd_embed = discord.Embed(title=f"{display_name} Info", color=colour)
+        rnd_embed = discord.Embed(
+            title=f"{display_name} Info",
+            color=colour,
+            description=f"**RANK**: {rank_switcher(rnd[0])}\n**DESIGNATION**: {rnd[2]}",
+        )
         if rnd[3] is not None:
             rnd_embed.add_field(name="Branch", value=rnd[3], inline=False)
         else:
@@ -247,6 +346,9 @@ class Data(commands.Cog):
             rnd_embed.add_field(name="Platoon", value=rnd[5], inline=False)
         if rnd[6] is not None:
             rnd_embed.add_field(name="Position", value=rnd[6], inline=False)
+
+        if rnd[7] is not None:
+            rnd_embed.add_field(name="Attendance", value=rnd[7], inline=False)
         rnd_embed.set_thumbnail(url=member.avatar.url)
 
         cshop_embed = discord.Embed(title=f"{display_name} C-Shop Info", color=colour)
@@ -256,14 +358,19 @@ class Data(commands.Cog):
             if cshop[0] is not None:
                 cshop_embed.add_field(name="Art Team", value=cshop[0], inline=False)
             if cshop[1] is not None:
-                cshop_embed.add_field(name="Administration", value=cshop[1], inline=False)
+                cshop_embed.add_field(
+                    name="Administration", value=cshop[1], inline=False
+                )
             if cshop[2] is not None:
                 cshop_embed.add_field(name="Event", value=cshop[2], inline=False)
             if cshop[3] is not None:
-                cshop_embed.add_field(name="Vanguard Security Team", value=cshop[3], inline=False)
+                cshop_embed.add_field(
+                    name="Vanguard Security Team", value=cshop[3], inline=False
+                )
             if cshop[4] is not None:
-                cshop_embed.add_field(name="Kaminoan Security Force", value=cshop[4], inline=False)
-
+                cshop_embed.add_field(
+                    name="Kaminoan Security Force", value=cshop[4], inline=False
+                )
 
         kmc_embed = discord.Embed(title=f"{display_name} KMC Info", color=colour)
         if kmc is None:
@@ -280,21 +387,39 @@ class Data(commands.Cog):
             if kmc[4] is not None:
                 kmc_embed.add_field(name="Aerial", value=kmc[4], inline=False)
             if kmc[5] is not None:
-                kmc_embed.add_field(name="Special Operations Division", value=kmc[5], inline=False)
+                kmc_embed.add_field(
+                    name="Special Operations Division", value=kmc[5], inline=False
+                )
 
         page_groups = []
-        rnd_page = PageGroup(pages=[rnd_embed], label="Main Info Page", use_default_buttons=False)
-        cshop_page = PageGroup(pages=[cshop_embed], label="C-Shop Info Page", use_default_buttons=False)
-        kmc_page = PageGroup(pages=[kmc_embed], label="KMC Info Page", use_default_buttons=False)
+        rnd_page = PageGroup(
+            pages=[rnd_embed], label="Main Info Page", use_default_buttons=False
+        )
+        cshop_page = PageGroup(
+            pages=[cshop_embed], label="C-Shop Info Page", use_default_buttons=False
+        )
+        kmc_page = PageGroup(
+            pages=[kmc_embed], label="KMC Info Page", use_default_buttons=False
+        )
         page_groups.append(rnd_page)
         page_groups.append(cshop_page)
         page_groups.append(kmc_page)
 
-        paginator = Paginator(pages=page_groups, use_default_buttons=False, show_indicator=False, show_menu=True, show_disabled=False,
-                                    timeout=300, menu_placeholder="Select a Request")
+        paginator = Paginator(
+            pages=page_groups,
+            use_default_buttons=False,
+            show_indicator=False,
+            show_menu=True,
+            show_disabled=False,
+            timeout=300,
+            menu_placeholder="Select a Request",
+        )
         await paginator.respond(ctx.interaction)
 
-    @data.command(name="name_check", description="Check if a member has a valid CT name and numbers and is available")
+    @data.command(
+        name="name_check",
+        description="Check if a member has a valid CT name and numbers and is available",
+    )
     async def _name_check(self, ctx: discord.ApplicationContext, name: str):
         # pattern = r"^([A-Z0-9]{2,4}) ([A-Z][a-z]+) ([A-Z]{1,2}-(?:[0-9]+|(?:\d-\d+\/\d+)))$"
         reserved = r"(?:CT-[0-6][0-9]{3}$)"
@@ -303,19 +428,78 @@ class Data(commands.Cog):
         desg = match.group(3)
         if match is not None:
             if re.match(reserved, desg) is not None:
-                await ctx.respond(f"{name} is reserved and cannot be reused", ephemeral=True)
+                await ctx.respond(
+                    f"{name} is reserved and cannot be reused", ephemeral=True
+                )
             else:
                 db, cursor = await connect_to_db()
-                await cursor.execute(f"SELECT ID, Rank, Name, Designation FROM members WHERE Name = '{Name}'")
+                await cursor.execute(
+                    f"SELECT ID, Rank, Name, Designation FROM members WHERE Name = '{Name}'"
+                )
                 result = await cursor.fetchone()
                 if result is None:
                     await ctx.respond(f"{name} is available", ephemeral=True)
                 else:
                     owner = await self.bot.get_or_fetch_user(result[0])
-                    await ctx.respond(f"{name} is not available\nCurrently held by: {result[1] + ' ' + result[2] + ' ' + result[3]} | {owner.mention}", ephemeral=True)
+                    await ctx.respond(
+                        f"{name} is not available\nCurrently held by: {result[1] + ' ' + result[2] + ' ' + result[3]} | {owner.mention}",
+                        ephemeral=True,
+                    )
         else:
             await ctx.respond(f"{name} is not a valid CT name", ephemeral=True)
 
+    @data.command(name="remove", description="Remove a member from the database")
+    async def _remove(self, ctx: discord.ApplicationContext, member: discord.Member):
+        db, cursor = await connect_to_db()
+        await cursor.execute(f"SELECT ID FROM members WHERE ID = {member.id}")
+        result = await cursor.fetchone()
+        if result is not None:
+            await cursor.execute(f"DELETE FROM Members WHERE ID = {member.id}")
+            await cursor.execute(f"DELETE FROM attendance WHERE ID = {member.id}")
+            await db.commit()
+            await cursor.close()
+            await db.close()
+            await ctx.respond(
+                f"Removed {member.name} from the database", ephemeral=True
+            )
+        else:
+            await ctx.respond(
+                f"{member.name} does not exist in the database", ephemeral=True
+            )
+
+    @data.command(name="platoon", description="Get info on a platoon")
+    @option(
+        "branch",
+        description="Branch the member belongs to",
+        choices=[
+            "Army",
+            "Starfighter Corps",
+            "Naval Auxiliary",
+            "Special Operations Force",
+            "Fleet Command",
+            "None",
+        ],
+    )
+    @option(
+        "company",
+        description="Company the member belongs to",
+        autocomplete=company_autocomplete,
+        required=True,
+    )
+    @option(
+        "platoon",
+        description="Platoon the member belongs to",
+        autocomplete=platoon_autocomplete,
+        required=True,
+    )
+    async def _get_platoon(
+        self, ctx: discord.ApplicationContext, branch: str, company: str, platoon: str
+    ):
+        db, cursor = await connect_to_db()
+        await cursor.execute(
+            f"SELECT Members.Rank, Members.Name, Members.Designation, "
+        )
+        
 
 def setup(bot):
     bot.add_cog(Data(bot))

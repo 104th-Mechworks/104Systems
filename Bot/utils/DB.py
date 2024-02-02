@@ -1,7 +1,9 @@
 import aiosqlite
 
 
-async def connect_to_db(name: str = "main.sqlite") -> tuple[aiosqlite.Connection, aiosqlite.Cursor]:
+async def connect_to_db(
+    name: str = "main.sqlite",
+) -> tuple[aiosqlite.Connection, aiosqlite.Cursor]:
     db = await aiosqlite.connect(name)
     cursor = await db.cursor()
     return db, cursor

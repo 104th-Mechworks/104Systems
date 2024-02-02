@@ -1,0 +1,153 @@
+# # # lst = [1,2,2,3,4,5,6,7,8,9]
+# # # print(set(lst))
+# # # print(max(set(lst), key=lst.count))
+# # #
+# # # # # insomnia passphrase: the debt that all men pay
+# # #
+# # # # convert 0b01000000000000000000 to decimal
+# # # b = 549755813888
+# # # print(bin(b))
+# # # print(int(b))
+# # # print(len('1000000000000000000000000000000000000000'))
+# # from functools import cache
+#
+#
+#
+# # # def sieve_of_eratosthenes(limit):
+# # #     primes = []
+# # #     is_prime = [True] * (limit + 1)
+# # #     is_prime[0] = is_prime[1] = False  # 0 and 1 are not prime numbers
+# # #
+# # #     for number in range(2, int(limit**0.5) + 1):
+# # #         if is_prime[number]:
+# # #             primes.append(number)
+# # #             for multiple in range(number * number, limit + 1, number):
+# # #                 is_prime[multiple] = False
+# # #
+# # #     for number in range(int(limit**0.5) + 1, limit + 1):
+# # #         if is_prime[number]:
+# # #             primes.append(number)
+# # #
+# # #     return primes
+# # #
+# # #
+# # # def prime_factor(number, primes):
+# # #     for n in primes:
+# # #         if number % n == 0:
+# # #             new_number = num // n
+# # #             print(n)
+# # #             return new_number, n
+# # #
+# # #
+# # # def remove_excess(primeslist: list, n):
+# # #     primeslist.sort(reverse=True)
+# # #     for p in primeslist:
+# # #         if p > n:
+# # #             primes.remove(p)
+# # #     return primes
+# # #
+# # #
+# # # num = int(input("enter a number"))
+# # # pf = []
+# # # primes = sieve_of_eratosthenes(num)
+# # # primes.reverse()
+# # # new_num, pfn = prime_factor(num, primes)
+# # # pf.append(pfn)
+# # # primes = remove_excess(primes, new_num)
+# # #
+# # #
+# # # while new_num != 0:
+# # #     new_num, pfn = prime_factor(num, primes)
+# # #     primes = remove_excess(primes, new_num)
+# # #     pf.append(pfn)
+# # #     if new_num in primes:
+# # #         pf.append(new_num)
+# # #         break
+# # #
+# # # print(f"prime factor decomposition of {num} is: {pfn}")
+#
+# # def sieve_of_eratosthenes(limit):
+# #     primes = []
+# #     is_prime = [True] * (limit + 1)
+# #     is_prime[0] = is_prime[1] = False  # 0 and 1 are not prime numbers
+#
+# #     for number in range(2, int(limit**0.5) + 1):
+# #         if is_prime[number]:
+# #             primes.append(number)
+# #             for multiple in range(number * number, limit + 1, number):
+# #                 is_prime[multiple] = False
+#
+# #     for number in range(int(limit**0.5) + 1, limit + 1):
+# #         if is_prime[number]:
+# #             primes.append(number)
+#
+# #     return primes
+#
+#
+# # def prime_factor(number, primes):
+# #     for n in primes:
+# #         if number % n == 0:
+# #             new_number = number // n
+# #             print(n)
+# #             return new_number, n
+# #     return None, None  # Return None if no prime factor is found
+#
+#
+# # def remove_excess(primeslist: list, n):
+# #     return [p for p in primeslist if p <= n]
+#
+#
+# # num = int(input("enter a number: "))
+# # pf = []
+# # primes = sieve_of_eratosthenes(num)
+# # primes.reverse()
+#
+# # while num != 0:
+# #     new_num, pfn = prime_factor(num, primes)
+# #     if new_num is None:
+# #         break  # Break the loop if no prime factor is found
+# #     primes = remove_excess(primes, new_num)
+# #     pf.append(pfn)
+# #     num = new_num
+#
+# # print(f"prime factor decomposition of {num} is: {pf}")
+#
+#
+# text = input("enter a string: ")
+#
+#
+#
+#
+#
+# def check(text: str):
+#     # check if all the characters are unique
+#     unique = True
+#     for i in text:
+#         if text.count(i) > 1:
+#             unique = False
+#             break
+#     if len(text) < 5 or len(text) > 7:
+#         print("wrong length")
+#         return False
+#     if text.upper() != text:
+#         print("all uppercase")
+#         return False
+#     if sum(text.encode("ascii")) > 600 or sum(text.encode("ascii")) < 350:
+#         print(sum(text.encode("ascii")))
+#         return False
+#     if unique == False:
+#         print("not unique")
+#         return False
+#     return True
+#
+#
+# valid = False
+# while valid == False:
+#     valid = check(text)
+#     if valid == False:
+#         text = input("enter a string: ")
+#     else:
+#         print("valid")
+#         break
+
+print(f""" "{"can't"}" """)

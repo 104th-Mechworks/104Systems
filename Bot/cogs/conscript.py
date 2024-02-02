@@ -13,8 +13,9 @@ from Bot.utils.regex import FULL
 log = logging.getLogger("Datacore")
 
 bot = commands.Bot(intents=discord.Intents.all())
-#resilient: discord.Guild = bot.get_guild(722211485505421442)
-#triumphant: discord.Guild = bot.get_guild(584701143968514048)
+# resilient: discord.Guild = bot.get_guild(722211485505421442)
+# triumphant: discord.Guild = bot.get_guild(584701143968514048)
+
 
 async def connect():
     db = await aiosqlite.connect("main.sqlite")
@@ -48,14 +49,11 @@ async def terminate(db: Connection, cursor) -> None:
 CtoP = {
     # branch server company role id: {platoon role id: platoon server id}
     722220828770566316: {
-        722224116891123723: 564954432928874506,  #howler
+        722224116891123723: 564954432928874506,  # howler
         722224129570504805: 565549847479058453,  # senti
         722224114177278013: 665361949483073562,  # taurus
     }
 }
-
-
-
 
 
 def check_company(ids: list[int] | int):
@@ -70,7 +68,7 @@ def check_company(ids: list[int] | int):
         750752796781052024: "Rogue",
         723093092764352592: "Rancor",
         723086687495913492: "Owls",
-        723086680608735262: "Eagles"
+        723086680608735262: "Eagles",
     }
     if isinstance(ids, list):
         for id1 in ids:
@@ -157,7 +155,17 @@ def check_position(ids):
 
 
 async def get_branchserver(self, company) -> discord.Guild:
-    if company in ["Ares", "Reaper", "Havoc", "Valkyrie", "Monarch", "Horizon", "Vanguard", "Rogue", "Rancor"]:
+    if company in [
+        "Ares",
+        "Reaper",
+        "Havoc",
+        "Valkyrie",
+        "Monarch",
+        "Horizon",
+        "Vanguard",
+        "Rogue",
+        "Rancor",
+    ]:
         branchserver: discord.Guild = self.bot.get_guild(722211485505421442)
         # if branchserver is None:
         #     branchserver: discord.Guild = await self.bot.fetch_guild(722211485505421442)
@@ -168,7 +176,17 @@ async def get_branchserver(self, company) -> discord.Guild:
 
 
 def branch_type(company):
-    if company in ["Ares", "Reaper", "Havoc", "Valkyrie", "Monarch", "Horizon", "Vanguard", "Rogue", "Rancor"]:
+    if company in [
+        "Ares",
+        "Reaper",
+        "Havoc",
+        "Valkyrie",
+        "Monarch",
+        "Horizon",
+        "Vanguard",
+        "Rogue",
+        "Rancor",
+    ]:
         return "Army"
     elif company in ["Owls", "Eagles"]:
         return "SFC"
@@ -176,9 +194,9 @@ def branch_type(company):
 
 def get_branch(name):
     if "company" in name.lower():
-        return 'Army'
+        return "Army"
     elif "squadron" or "wing" in name.lower():
-        return 'SFC'
+        return "SFC"
     else:
         return None
 
@@ -195,7 +213,7 @@ def map_company(id):
         750752796781052024: "Rogue",
         723093092764352592: "Rancor",
         723086687495913492: "Owls",
-        723086680608735262: "Eagles"
+        723086680608735262: "Eagles",
     }
     return companies.get(id)
 
@@ -211,7 +229,9 @@ class Conscript(commands.Cog):
     @commands.command()
     async def spop(self, ctx: commands.Context):
         print("Start")
-        pattern = r"^([A-Z]{2,4}) ([A-Z][a-z]+) ([A-Z]{1,2}-(?:[0-9]+|(?:\d-\d+\/\d+)))$"
+        pattern = (
+            r"^([A-Z]{2,4}) ([A-Z][a-z]+) ([A-Z]{1,2}-(?:[0-9]+|(?:\d-\d+\/\d+)))$"
+        )
         count = 1
         db = await aiosqlite.connect("main.sqlite")
         cursor = await db.cursor()
@@ -245,9 +265,20 @@ class Conscript(commands.Cog):
                         print(f"{member.display_name} | {company} | {platoon}")
 
                 await cursor.execute(
-                            f"INSERT INTO Members (ID, Rank, Name, Designation, Branch, Company, Platoon, Position, XP, LVL) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                            (member.id, RANK, NAME, DESG, branch, company, platoon, position, 0, 0),
-                        )
+                    f"INSERT INTO Members (ID, Rank, Name, Designation, Branch, Company, Platoon, Position, XP, LVL) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (
+                        member.id,
+                        RANK,
+                        NAME,
+                        DESG,
+                        branch,
+                        company,
+                        platoon,
+                        position,
+                        0,
+                        0,
+                    ),
+                )
                 await db.commit()
         await cursor.close()
         await db.close()
@@ -257,7 +288,7 @@ class Conscript(commands.Cog):
     @discord.slash_command(name="conscript", description="adds members to the database")
     async def rolebasedconscript(self, ctx: discord.ApplicationContext):
         await ctx.defer()
-        counter=0
+        counter = 0
         db, cursor = await connect()
         # pattern = r"^([A-Z0-9]{2,4}) ([A-Z][a-z]+) ([A-Z]{1,2}-(?:[0-9]+|(?:\d-\d+\/\d+)))$"
         async for member in ctx.guild.fetch_members(limit=12000):

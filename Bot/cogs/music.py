@@ -200,7 +200,7 @@ class MusicPlayerCog(commands.Cog):
             f"Track got stuck {track.title}\nto put it back in queue use /play {track.title}")
 
     music = discord.SlashCommandGroup(name="music", description="all commands referring to the music part",
-                                      guild_only=True, )
+                                      guild_only=True)
 
     @music.command(name="play", description="Play a song you want to play.")
     async def play(self, ctx: discord.ApplicationContext, search: discord.Option(

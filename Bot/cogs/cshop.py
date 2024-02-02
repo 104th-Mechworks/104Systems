@@ -13,6 +13,7 @@ ID: member id
 JsonObject handler:
 """
 
+
 def cshop_team_position(ctx: discord.AutocompleteContext):
     if ctx.options["team"] == "Administration":
         return [
@@ -20,14 +21,10 @@ def cshop_team_position(ctx: discord.AutocompleteContext):
             "Deputy Chief of Analysis",
             "Console Level Administrator",
             "Company Level Administrator",
-            "Platoon Level Administrator"
+            "Platoon Level Administrator",
         ]
     if ctx.options["team"] == "Vanguard Security Team":
-        return [
-            "Lead",
-            "Asst. Lead",
-            "Support Staff"
-        ]
+        return ["Lead", "Asst. Lead", "Support Staff"]
     if ctx.options["team"] == "Art Team":
         return [
             "Lead",
@@ -87,36 +84,52 @@ class CShop(commands.Cog):
     def __init__(self, bot: DatacoreBot):
         self.bot = bot
 
-    cshp = discord.SlashCommandGroup("cshop", description="CShop commands")
-
+    cshp = discord.SlashCommandGroup(
+        "cshop", description="CShop commands", guild_only=True
+    )
 
     @cshp.command(name="add", description="Add a member to a cshop team")
     @option("member", description="Member to remove from the cshop team", required=True)
-    @option("team", required=True, choices=[
+    @option(
+        "team",
+        required=True,
+        choices=[
             "Administration",
             "Vanguard Security Team",
             "Kaminoan Security Force",
             "104th Security",
             "Art Team",
-            ])
-    @option('position', required=True, autocomplete=cshop_team_position)
-    async def add(self, ctx: discord.ApplicationContext, member: discord.Member, team: str, position: str):
+        ],
+    )
+    @option("position", required=True, autocomplete=cshop_team_position)
+    async def add(
+        self,
+        ctx: discord.ApplicationContext,
+        member: discord.Member,
+        team: str,
+        position: str,
+    ):
         db, cursor = await connect_to_db()
         team_table = await team_switcher(team)
         await cursor.execute(f"SELECT ID FROM members WHERE ID = {member.id} ")
         if await cursor.fetchone() is None:
-            await ctx.respond(f"{member.name} does not exist in the database", ephemeral=True)
+            await ctx.respond(
+                f"{member.name} does not exist in the database", ephemeral=True
+            )
         else:
             await cursor.execute(f"SELECT ID FROM cshop WHERE ID = {member.id}")
             if await cursor.fetchone() is None:
-
-                await cursor.execute(f"INSERT INTO cshop (ID, {team_table}) VALUES ({member.id}, '{position}')")
+                await cursor.execute(
+                    f"INSERT INTO cshop (ID, {team_table}) VALUES ({member.id}, '{position}')"
+                )
                 await db.commit()
                 await cursor.close()
                 await db.close()
                 await ctx.respond(f"Added {member.name} to {team}", ephemeral=True)
             else:
-                await cursor.execute(f"UPDATE cshop SET '{team_table}' = '{position}' WHERE ID = {member.id}")
+                await cursor.execute(
+                    f"UPDATE cshop SET '{team_table}' = '{position}' WHERE ID = {member.id}"
+                )
                 await db.commit()
                 await cursor.close()
                 await db.close()
@@ -124,25 +137,37 @@ class CShop(commands.Cog):
 
     @cshp.command(name="remove", description="Remove a member from a cshop team")
     @option("member", description="Member to remove from the cshop team", required=True)
-    @option("team", required=True, choices=[
-        "Administration",
-        "Vanguard Security Team",
-        "Kaminoan Security Force",
-        "104th Security",
-        "Art Team",
-    ])
-    async def remove(self, ctx: discord.ApplicationContext, member: discord.Member, team: str):
+    @option(
+        "team",
+        required=True,
+        choices=[
+            "Administration",
+            "Vanguard Security Team",
+            "Kaminoan Security Force",
+            "104th Security",
+            "Art Team",
+        ],
+    )
+    async def remove(
+        self, ctx: discord.ApplicationContext, member: discord.Member, team: str
+    ):
         db, cursor = await connect_to_db()
         await cursor.execute(f"SELECT ID FROM cshop WHERE ID = {member.id}")
         if await cursor.fetchone() is None:
-            await ctx.respond(f"{member.display_name} is not in a cshop team", ephemeral=True)
+            await ctx.respond(
+                f"{member.display_name} is not in a cshop team", ephemeral=True
+            )
         else:
             team_table = await team_switcher(team)
-            await cursor.execute(f"UPDATE cshop SET {team_table} = {None} WHERE ID = {member.id}")
+            await cursor.execute(
+                f"UPDATE cshop SET {team_table} = {None} WHERE ID = {member.id}"
+            )
             await db.commit()
             await cursor.close()
             await db.close()
-            await ctx.respond(f"Removed {member.display_name} from {team} team", ephemeral=True)
+            await ctx.respond(
+                f"Removed {member.display_name} from {team} team", ephemeral=True
+            )
 
 
 def setup(bot: DatacoreBot):

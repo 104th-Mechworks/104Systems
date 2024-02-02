@@ -1,7 +1,6 @@
 # contains dictionaries for the data cog
 
 
-
 class CompanyNotFound(Exception):
     def __init__(self, message="Company not found"):
         self.message = message
@@ -18,7 +17,7 @@ async def company_name_switcher(company):
             return "Havoc"
         case "29th Valkyrie Company":
             return "Valkyrie"
-        case  "48th Rogue Company":
+        case "48th Rogue Company":
             return "Rogue"
         case "34th Horizon Company":
             return "Horizon"
@@ -65,3 +64,42 @@ async def company_name_switcher(company):
         case _:
             return None
 
+
+def rank_switcher(rank: str) -> str:
+    match rank:
+        case "CT":
+            return "Clone Trooper"
+        case "LCPL":
+            return "Lance Corporal"
+        case "CPL":
+            return "Corporal"
+        case "SGT":
+            return "Sergeant"
+        case "SGM":
+            return "Sergeant Major"
+        case "2LT":
+            return "2nd Lieutenant"
+        case "LT":
+            return "Lieutenant"
+        case "CPT":
+            return "Captain"
+        case "MAJ":
+            return "Major"
+        case "CDR":
+            return "Commander"
+        case "BCDR":
+            return "Battalion Commander"
+        case "SCDR":
+            return "Senior Commander"
+        case "MCDR":
+            return "Marshal Commander"
+        case "PO":
+            return "Pilot Officer"
+        case "FO":
+            return "Flight Officer"
+        case "FLT":
+            return "Flight Lieutenant"
+        case "FCPT":
+            return "Flight Captain"
+        case "SL":
+            return "Squadron Leader"

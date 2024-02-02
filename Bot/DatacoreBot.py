@@ -1,14 +1,18 @@
 import asyncio
 import json
 import logging
-import os
+# import os
+from contextlib import suppress
+
 import aiohttp
 import discord
 import pomice
+from discord import ApplicationContext, DiscordException
 from discord.ext import commands
+from discord.ext.commands import Context, errors
 from dotenv import load_dotenv
 
-from Bot.utils.DB import connect_to_db
+# from Bot.utils.DB import connect_to_db
 from Bot.utils.logger import logger as log
 
 load_dotenv()
@@ -27,7 +31,10 @@ class DatacoreBot(commands.Bot):
     async def read_nodes(self):
         with open("lavalink.json", "r") as f:
             data: dict = json.load(f)
-        tasks = [asyncio.create_task(self.connect_node(key, value)) for key, value in data.items()]
+        tasks = [
+            asyncio.create_task(self.connect_node(key, value))
+            for key, value in data.items()
+        ]
         await self.wait_until_ready()
         await asyncio.gather(*tasks)
         log.info(f"We got {len(self.pool.nodes)} Nodes in total.")
@@ -48,9 +55,7 @@ class DatacoreBot(commands.Bot):
                     None if values["SPOTIFY_ID"] == "" else values["SPOTIFY_ID"]
                 ),
                 spotify_client_secret=(
-                    None
-                    if values["SPOTIFY_SECRET"] == ""
-                    else values["SPOTIFY_SECRET"]
+                    None if values["SPOTIFY_SECRET"] == "" else values["SPOTIFY_SECRET"]
                 ),
             )
             log.info(
@@ -82,50 +87,17 @@ class DatacoreBot(commands.Bot):
             await self.read_nodes()
             self.first_start = False
 
+    async def on_command_error(
+        self, ctx: commands.Context, exception: errors.CommandError
+    ) -> None:
+        if isinstance(exception, errors.CommandNotFound):
+            suppress(errors.CommandNotFound)
+            return
+        else:
+            log.error(exception)
 
-bot = DatacoreBot(
-    command_prefix=".",
-    case_insensitive=True,
-    strip_after_prefix=True,
-    intents=discord.Intents.all(),
-    activity=discord.Activity(
-        type=discord.ActivityType.watching,
-        name="104th Battalion"
-    ),
-    status=discord.Status.dnd
-)
-
-
-@bot.slash_command()
-async def reload(ctx: discord.ApplicationContext, extension: discord.Option(description="cog to reload",
-                                                                            choices=["attendance", "brig", "info",
-                                                                                     "music", "level", "medbay", "data"])):
-    bot.reload_extension(f"cogs.{extension}")
-    await ctx.respond(f"Reloaded {extension}")
-
-
-@bot.slash_command()
-async def medbay_channel(ctx: discord.ApplicationContext, nffccategory: discord.CategoryChannel, loacategory: discord.CategoryChannel, nffcrole: discord.Role, loarole: discord.Role):
-    db, cursor = await connect_to_db()
-    await cursor.execute(f"SELECT ID FROM ServerConfig WHERE ID = {ctx.guild_id}")
-    result = await cursor.fetchone()
-    if result is None:
-        await cursor.execute(
-            f"INSERT INTO ServerConfig (ID, NFFCcat, NFFCr, LOAcat, LOAr) VALUES ({ctx.guild_id}, {nffccategory.id}, {nffcrole.id}, {loacategory.id}, {loarole.id})")
-    else:
-        await cursor.execute(
-            f"UPDATE ServerConfig SET NFFCcat = {nffccategory.id}, NFFCr = {nffcrole.id}, LOAcat = {loarole.id}, LOAr = {loarole.id} WHERE ID = {ctx.guild_id}")
-    await db.commit()
-    await cursor.close()
-    await db.close()
-    await ctx.respond(f"Updated {ctx.guild.name} medbay roles and categories", ephemeral=True)
-    return
-
-
-def pre_start():
-    bot.load_extensions("cogs", recursive=True)
-
-
-if __name__ == "__main__":
-    pre_start()
-    bot.run(os.getenv("TOKEN"))
+    async def on_application_command_error(
+        self, context: ApplicationContext, exception: DiscordException
+    ) -> None:
+        if isinstance(exception, asyncio.TimeoutError):
+            log.error(exception)
