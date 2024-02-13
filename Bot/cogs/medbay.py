@@ -89,71 +89,45 @@ class MedbayRequestModal(discord.ui.Modal):
 
     async def callback(self, interaction: discord.Interaction):
         db, cursor = await connect_to_db()
-        await cursor.execute(
-            f"SELECT Status FROM medbay WHERE UserID = {interaction.user.id} AND status = {1}"
-        )
+        await cursor.execute(f"SELECT Status FROM medbay WHERE UserID = {interaction.user.id} AND status = {1}")
         active = await cursor.fetchone()
         if active is not None:
-            await interaction.response.send_message(
-                "You already have an active medbay request", ephemeral=True
-            )
+            await interaction.response.send_message("You already have an active medbay request", ephemeral=True)
             return
 
-        values = [
-            self.children[0].value,
-            self.children[1].value,
-            self.children[2].value,
-        ]
+        values = [self.children[0].value, self.children[1].value, self.children[2].value]
 
         if date_check(values[0]) == "Invalid date":
             await interaction.response.send_message(
-                "Invalid start date\nmake sure its day then month then year. (e.g 01-09-2023)",
-                ephemeral=True,
-            )
+                "Invalid start date\nmake sure its day then month then year. (e.g 01-09-2023)", ephemeral=True)
             return
         elif date_check(values[1]) == "Invalid date":
             await interaction.response.send_message(
-                "Invalid end date\nmake sure its day then month then year. (e.g 01-09-2023)",
-                ephemeral=True,
-            )
+                "Invalid end date\nmake sure its day then month then year. (e.g 01-09-2023)", ephemeral=True)
             return
 
         overwrites = {
-            interaction.guild.default_role: discord.PermissionOverwrite(
-                read_messages=False, view_channel=False
-            ),
-            interaction.user: discord.PermissionOverwrite(
-                view_channel=True, send_messages=True, read_messages=True
-            ),
-        }
+            interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, view_channel=False),
+            interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True)}
 
-        await cursor.execute(
-            f"SELECT LOAcat, NFFCcat, authIDs FROM ServerConfig WHERE ID = {interaction.guild.id}"
-        )
+        await cursor.execute(f"SELECT LOAcat, NFFCcat, authIDs FROM ServerConfig WHERE ID = {interaction.guild.id}")
         ticket_setup = await cursor.fetchone()
-        auth_ids = [int(i) for i in ticket_setup[2].strip("[]").split(",")]
+        auth_ids = [int(i) for i in ticket_setup[2].strip('[]').split(',')]
 
         for i in auth_ids:
             role = await fetch_or_get_role(interaction.guild, i)
-            overwrites[role] = discord.PermissionOverwrite(
-                read_messages=True, send_messages=True, read_message_history=True
-            )
+            overwrites[role] = discord.PermissionOverwrite(read_messages=True, send_messages=True,
+                                                           read_message_history=True)
 
-        embed = discord.Embed(
-            title=f"**{interaction.user.display_name} {self.type} Request**",
-            description=f"""
+        embed = discord.Embed(title=f"**{interaction.user.display_name} {self.type} Request**", description=f"""
                     **Start Date:** {values[0]}
                     **End Date:** {values[1]}
                     **Reason:** {values[2]}
-                    """,
-            color=discord.Colour.from_rgb(206, 206, 206),
-        )
+                    """, color=discord.Colour.from_rgb(206, 206, 206), )
         embed.timestamp = datetime.datetime.utcnow()
         category = None
         if self.type == "NFFC":
-            category: discord.CategoryChannel = interaction.guild.get_channel(
-                ticket_setup[1]
-            )
+            category: discord.CategoryChannel = interaction.guild.get_channel(ticket_setup[1])
             if category is None:
                 category = await interaction.guild.fetch_channel(ticket_setup[1])
         elif self.type == "LOA":
@@ -163,22 +137,14 @@ class MedbayRequestModal(discord.ui.Modal):
         else:
             await interaction.response.send_message("Invalid type", ephemeral=True)
         channel: discord.TextChannel = await interaction.guild.create_text_channel(
-            f"{interaction.user.name}-{self.type}",
-            category=category,
-            overwrites=overwrites,
-        )
+            f"{interaction.user.name}-{self.type}", category=category, overwrites=overwrites)
         await cursor.execute(
-            f"INSERT INTO medbay (UserID, Type, startDate, endDate, Reason, Status, channelID, GuildID) VALUES ({interaction.user.id}, '{self.type}', '{values[0]}', '{values[1]}', '{values[2]}', {0}, {channel.id}, {interaction.guild.id})"
+            f"""INSERT INTO medbay (UserID, Type, startDate, endDate, Reason, Status, channelID, GuildID) VALUES ({interaction.user.id}, "{self.type}", "{values[0]}", "{values[1]}", "{values[2]}", {0}, {channel.id}, {interaction.guild.id})"""
         )
         await db.commit()
         await close_db(db, cursor)
-        await channel.send(
-            embed=embed,
-            view=SubmitButtons(),
-        )
-        await interaction.response.send_message(
-            f"ticket can be found here: {channel.mention}"
-        )
+        await channel.send(embed=embed, view=SubmitButtons(), )
+        await interaction.response.send_message(f"ticket can be found here: {channel.mention}", ephemeral=True)
 
 
 class SubmitButtons(discord.ui.View):
@@ -270,6 +236,8 @@ class DenyRequestModal(discord.ui.Modal):
         await db.commit()
         await cursor.close()
         await db.close()
+        await interaction.response.send_message("Request denied.\nTicket closing...")
+        await interaction.channel.delete()
 
 
 class CloseButtons(discord.ui.View):
@@ -295,7 +263,19 @@ class CloseButtons(discord.ui.View):
             f"UPDATE medbay SET Status=1 WHERE channelID={interaction.channel.id}"
         )
         await db.commit()
+        await cursor.execute(f"SELECT LOAr, NFFCr FROM ServerConfig WHERE ID = {interaction.guild.id}")
+        roles = await cursor.fetchone()
         await cursor.close()
+        await db.close()
+        channel = interaction.channel
+        category_name = channel.category.name
+        if category_name == "LOA":
+            LOA = await interaction.guild._fetch_role(roles[0])
+            await interaction.user.add_roles(LOA, reason="Started LOA")
+        elif category_name == "NFFC":
+            NFFC = await interaction.guild._fetch_role(roles[1])
+            await interaction.user.add_roles(NFFC, reason="Started LOA")
+
         await interaction.response.send_message(
             "your leave has now started", ephemeral=True
         )
@@ -385,7 +365,7 @@ class Medbay(commands.Cog):
             member = ctx.author
         db, cursor = await connect_to_db()
         await cursor.execute(
-            f"SELECT UserID, endDate, Status, channelID FROM medbay WHERE UserID = {member.id} AND (Status = {1} OR Status = {3})"
+            f"SELECT UserID, endDate, Status, channelID, Type FROM medbay WHERE UserID = {member.id} AND (Status = {1} OR Status = {3})"
         )
         result = await cursor.fetchone()
         if result is None:
@@ -403,8 +383,6 @@ class Medbay(commands.Cog):
                 f"UPDATE medbay SET Status = {2} WHERE UserID = {member.id} AND Status = {1}"
             )
             await db.commit()
-            await cursor.close()
-            await db.close()
             await ctx.respond(f"Returned {member.display_name} from medbay")
         elif result[2] == 3:
             end_date = datetime.datetime.strptime(result[1], "%d-%m-%Y")
@@ -415,12 +393,21 @@ class Medbay(commands.Cog):
                 f"UPDATE medbay SET endDate = {new_end_date}, Status = {4} WHERE UserID = {member.id} AND Status = {3}"
             )
             await db.commit()
-            await cursor.close()
-            await db.close()
             await ctx.respond(
                 f"Returned {member.display_name} from medbay. {days_late} days late"
             )
 
+        ttype = result[4]
+        await cursor.execute(f"SELECT LOAr, NFFCr FROM ServerConfig WHERE ID = {ctx.guild.id}")
+        roles = await cursor.fetchone()
+        await cursor.close()
+        await db.close()
+        if ttype == "LOA":
+            LOA = await ctx.guild._fetch_role(roles[0])
+            await member.remove_roles(LOA, reason="returned from LOA")
+        elif ttype == "NFFC":
+            NFFC = await ctx.guild._fetch_role(roles[1])
+            await member.remove_roles(NFFC, reason="returned from LOA")
         await channel.delete()
 
     @commands.command()
@@ -449,9 +436,10 @@ class Medbay(commands.Cog):
         await ctx.channel.send(embed=embed, view=view)
 
     @commands.command()
-    async def medbay_authroles(self, ctx: commands.Context):
+    async def medbay_authroles(self, ctx: commands.Context, *roles: discord.Role):
         ids = []
-        for role in ctx.message.role_mentions:
+        # for role in ctx.message.role_mentions:
+        for role in roles:
             ids.append(role.id)
         db, cursor = await connect_to_db()
         await cursor.execute(
@@ -512,7 +500,7 @@ class Medbay(commands.Cog):
 
         if resT == "m":
             with open(f"{member.display_name}.txt", "w") as f:
-                f.write(f"Medbay Report for {member.display_name}:\nafter: {date}\n\n")
+                f.write(f"Medbay Report for: {member.display_name} \nafter: {date}\n\n")
                 for entry in r:
                     mtype = entry[0]
                     start_date = entry[1]
@@ -629,31 +617,22 @@ class Medbay(commands.Cog):
             return
 
     @discord.slash_command()
-    async def medbay_channel(
-        self,
-        ctx: discord.ApplicationContext,
-        nffccategory: discord.CategoryChannel,
-        loacategory: discord.CategoryChannel,
-        nffcrole: discord.Role,
-        loarole: discord.Role,
-    ):
+    async def medbay_channel(self, ctx: discord.ApplicationContext, nffccategory: discord.CategoryChannel,
+                             loacategory: discord.CategoryChannel, nffcrole: discord.Role, loarole: discord.Role):
         db, cursor = await connect_to_db()
         await cursor.execute(f"SELECT ID FROM ServerConfig WHERE ID = {ctx.guild_id}")
         result = await cursor.fetchone()
         if result is None:
             await cursor.execute(
-                f"INSERT INTO ServerConfig (ID, NFFCcat, NFFCr, LOAcat, LOAr) VALUES ({ctx.guild_id}, {nffccategory.id}, {nffcrole.id}, {loacategory.id}, {loarole.id})"
-            )
+                f"INSERT INTO ServerConfig (ID, NFFCcat, NFFCr, LOAcat, LOAr) VALUES ({ctx.guild_id}, {nffccategory.id}, {nffcrole.id}, {loacategory.id}, {loarole.id})")
         else:
             await cursor.execute(
-                f"UPDATE ServerConfig SET NFFCcat = {nffccategory}, NFFCr = {nffcrole.id}, LOAcat = {loacategory.id}, LOAr = {loarole.id} WHERE ID = {ctx.guild_id}"
-            )
+                f"UPDATE ServerConfig SET NFFCcat = {nffccategory.id}, NFFCr = {nffcrole.id}, LOAcat = {loarole.id}, LOAr = {loarole.id} WHERE ID = {ctx.guild_id}")
         await db.commit()
         await cursor.close()
         await db.close()
-        await ctx.respond(
-            f"Updated {ctx.guild.name} medbay roles and categories", ephemeral=True
-        )
+        await ctx.respond(f"Updated {ctx.guild.name} medbay roles and categories", ephemeral=True)
+        return
 
 
 def setup(bot: DatacoreBot):
