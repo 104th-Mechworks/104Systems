@@ -167,3 +167,5 @@ config.sqlite
 testing.ipynb
 .DS_Store
 .icons/
+.icons
+bans.json
