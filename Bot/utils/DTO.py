@@ -10,6 +10,24 @@ class BaseDTO:
         self.dto = {}
 
 
+def kmcsort(elem):
+    if 'Head Cadre' in elem:
+        return (5, elem)
+    elif 'Cadre' in elem:
+        return (4, elem)
+    elif 'Advanced Instructor' in elem:
+        return (3, elem)
+    elif 'Instructor' in elem:
+        return (2, elem)
+    elif 'Advanced' in elem:
+        return (1, elem)
+    else:
+        return (0, elem)
+
+def kmcsortlist(lst) -> list:
+    return sorted(lst, key=kmcsort)
+
+
 class FullMemberDTO(BaseDTO):
 
     async def get(self, member_id: int):
@@ -57,9 +75,12 @@ class FullMemberDTO(BaseDTO):
                 kmcroles.remove(role)
             elif role.__contains__('Rifleman'):
                 anti_armor.append(role)
+        if anti_armor:
+            anti_armor = kmcsort(anti_armor)
+
 
         self.dto['kmc'] = {
-            'anti-armour': {for }
+            'anti-armour': anti_armor
         }
         print(json.dumps(self.dto, indent=2))
         return self.dto

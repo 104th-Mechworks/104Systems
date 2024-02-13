@@ -26,23 +26,6 @@ bot = DatacoreBot(
 
 exp = r"^([A-Z0-9]{2,4}) ([A-ZÁÉÍÓÚÜ][A-ZÁÉÍÓÚÜa-záéíóúü]+) ((?:[A-Z]{1,3}-)(?:(?:[0-9]{4,5})|(?:[0-9]{2}-[0-9]{3})|(?:\d+-\d+\/\d+)|(?:\d+-\d{4})))$"
 
-bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
-
-
-@bot.command()
-async def nget(ctx: commands.Context):
-    i=0
-    with open("names.txt", "w") as f:
-        f.write("104th Names reverse order\n")
-        async for message in ctx.channel.history(limit=1000000000):
-            match = re.match(exp, message.content)
-            if match:
-                print(f"{i} | {' '.join(match.groups())}")
-                f.write(f"{' '.join(match.groups())}\n")
-                i +=1
-                asyncio.sleep(0.2)
-                continue
-
 
 def pre_start():
     bot.load_extensions("Bot.cogs", recursive=True)
@@ -70,9 +53,9 @@ if __name__ == "__main__":
     load_dotenv(".env")
 
     logger = logging.getLogger("Datacore")
-    logger.setLevel(logging.DEBUG if debug else logging.INFO)
-
+    # logger.setLevel(logging.DEBUG if debug else logging.INFO)
+    logger.setLevel(logging.DEBUG)
     pre_start()
-    bot.run("MTA3ODI0OTAzMzU0NzY2NTQ4OQ.GAaX-e.qC3W27emPb-Wk5lCepdt2vL3fjwlcyguzzw7v8")
-# # TOKEN = "OTMzMjkxNTUxNzQyOTA2NDA4.Gy-BYb.ZgqDwVullkmDLgYJQSJTi0AmeMXCoVYKBxAjxU"
+    # bot.run("MTA3ODI0OTAzMzU0NzY2NTQ4OQ.GPko32.7DLzajDZqQ1O5yskoXRgbu5Z25ioErhq0J6zAk")
+    bot.run("OTMzMjkxNTUxNzQyOTA2NDA4.GztRJL.qqZj2QkkU9gq6C2Qzq3dDaJRv9gL1Fq0Ot13Yk")
     

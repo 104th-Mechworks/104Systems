@@ -154,6 +154,16 @@ async def get_branch_colour(branch=None, rank=None) -> discord.Colour:
         return discord.Colour.from_rgb(61, 67, 69)
 
 
+def position_sort(element):
+    positions = ['CCO', 'CXO', 'CNCO', 'PCO', 'PXO', 'PNCO', 'SL', 'SNCO', 'FTL']
+    return positions.index(element)
+
+def rank_sort(element):
+    ranks = ['MCDR', 'SCDR', 'COM', 'BCDR', 'CDR', 'GEN', 'AirCPT', 'RCMAJ', 'MAJ', 'ACPT', 'MCPO', 'CPT', 'WCDR', 'RCCPT', 'NCDR', 'LT', 'GCPT', 'RCLT', 'ARCLT', 'LTCDR', '2LT', 'RC2LT', 'NLT', 'CPO', 'SGM', 'SL', 'RCSGM', 'ASGT', 'RCSGT', 'RCCPL', 'RCPVT', 'ARC', 'RC', 'PO1', 'SGT', 'FCPT', 'PO2', 'CPL', 'FLT', 'PO3', 'LCPL', 'FO', 'PO', 'CT']
+    return ranks.index(element)
+
+
+
 class Data(commands.Cog):
     def __init__(self, bot: DatacoreBot):
         self.bot = bot
@@ -495,11 +505,14 @@ class Data(commands.Cog):
     async def _get_platoon(
         self, ctx: discord.ApplicationContext, branch: str, company: str, platoon: str
     ):
+        company = await company_name_switcher(company)
         db, cursor = await connect_to_db()
         await cursor.execute(
-            f"SELECT Members.Rank, Members.Name, Members.Designation, "
+            f"SELECT Members.Rank, Members.Name, Members.Designation, Members.Position FROM Members WHERE Platoon = '{platoon}' AND Company = '{company}'"
         )
-        
+        r = await cursor.fetchall()
+        print(r)
+        r = sorted(r,key=position_sort(r[i][3]))
 
 def setup(bot):
     bot.add_cog(Data(bot))

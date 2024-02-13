@@ -145,9 +145,47 @@
 # while valid == False:
 #     valid = check(text)
 #     if valid == False:
-#         text = input("enter a string: ")
-#     else:
-#         print("valid")
-#         break
-
-print(f""" "{"can't"}" """)
+# #         text = input("enter a string: ")
+# #     else:
+# #         print("valid")
+# #         break
+# role = {
+#     "anti_armour": 0b100000000,
+#     "anti_armour_instructor": 0b1000000000,
+#     "advanced_anti_armour": 0b10000000000,
+#     "advanced_anti_armour_instructor": 0b100000000000,
+#     "anti_armour_cadre": 0b1000000000000,
+#     "advanced_marksman_instructor": 0b1000000000000000000,
+#     "head_anti_armour_cadre": 0b10000000000000
+# }
+# s=0
+# for v in role.values():
+#     s += v
+#
+# from Bot.utils.kmcbitroles import RoleSwitcher
+#
+# rs = RoleSwitcher.decode(s)
+#
+# def kmcsort(elem):
+#     keywords = [
+#         ('Head Cadre', 5),
+#         ('Cadre', 4),
+#         ('Advanced Instructor', 3),
+#         ('Instructor', 2),
+#         ('Advanced', 1),
+#     ]
+#
+#     matches = [(priority, keyword) for keyword, priority in keywords if keyword in elem]
+#
+#     if matches:
+#         # Sort matches by keyword length in descending order
+#         matches.sort(key=lambda x: len(x[1]), reverse=True)
+#         return matches[0]
+#
+#     return (0, elem)
+#
+# def kmcsortlist(lst) -> list:
+#     return list(reversed(sorted(lst, key=kmcsort)))
+#
+# print(rs)
+# kmcsortlist(rs)

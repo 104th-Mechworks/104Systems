@@ -50,7 +50,6 @@ class DatacoreBot(commands.Bot):
                 secure=values["SECURE"],
                 identifier=identifier,
                 fallback=True,
-                log_level=logging.WARNING,
                 spotify_client_id=(
                     None if values["SPOTIFY_ID"] == "" else values["SPOTIFY_ID"]
                 ),
