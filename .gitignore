@@ -165,3 +165,5 @@ logs/
 config.sqlite
 .idea
 testing.ipynb
+.DS_Store
+.icons/
