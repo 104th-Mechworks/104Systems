@@ -330,18 +330,18 @@ async def main_list_logic(platform: str):
         if e[0] in officer_ranks:
             officers.append(e)
         else:
-            ncos.append((e))
+            ncos.append(e)
 
-    for e in officers:
-        member = e[0] + " " + e[1] + " " + e[2]
-        ltype = f"**{e[3]}**"
+    for o in officers:
+        member = o[0] + " " + o[1] + " " + o[2]
+        ltype = f"**{o[3]}**"
         officers_fmt.append(member + " : " + ltype)
 
     officers_fmt_str = "\n".join(officers_fmt)
 
-    for e in ncos:
-        member = e[0] + " " + e[1] + " " + e[2]
-        ltype = f"**{e[3]}**"
+    for n in ncos:
+        member = n[0] + " " + n[1] + " " + n[2]
+        ltype = f"**{n[3]}**"
         ncos_fmt.append(member + " : " + ltype)
 
     ncos_fmt_str = "\n".join(ncos_fmt)
