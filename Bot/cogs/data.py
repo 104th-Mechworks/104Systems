@@ -1,3 +1,4 @@
+import json
 import re
 from discord.ext.pages import Paginator, PageGroup
 import discord
@@ -162,7 +163,11 @@ def rank_sort(element):
     ranks = ['MCDR', 'SCDR', 'COM', 'BCDR', 'CDR', 'GEN', 'AirCPT', 'RCMAJ', 'MAJ', 'ACPT', 'MCPO', 'CPT', 'WCDR', 'RCCPT', 'NCDR', 'LT', 'GCPT', 'RCLT', 'ARCLT', 'LTCDR', '2LT', 'RC2LT', 'NLT', 'CPO', 'SGM', 'SL', 'RCSGM', 'ASGT', 'RCSGT', 'RCCPL', 'RCPVT', 'ARC', 'RC', 'PO1', 'SGT', 'FCPT', 'PO2', 'CPL', 'FLT', 'PO3', 'LCPL', 'FO', 'PO', 'CT']
     return ranks.index(element)
 
-
+def is_allowed(ctx):
+    allowed_users = [618502892449693727, 434076591052685322]  # Example list of allowed user IDs
+    is_admin = ctx.author.permissions.administrator
+    is_allowed = ctx.author.id in allowed_users
+    return is_admin or is_allowed
 
 class Data(commands.Cog):
     def __init__(self, bot: DatacoreBot):
@@ -513,6 +518,45 @@ class Data(commands.Cog):
         r = await cursor.fetchall()
         print(r)
         r = sorted(r,key=position_sort(r[i][3]))
+        pass
+
+    @data.command()
+    async def check_bans(self, ctx: discord.ApplicationContext, member: discord.Member = None, id=None):
+        with open('bans.json') as f:
+            data = json.load(f)
+
+        if id is not None:
+            # Check if id is a valid integer
+            try:
+                id = int(id)
+            except ValueError:
+                await ctx.respond("Please provide a valid integer user ID.", ephemeral=True)
+                return
+
+        if member is None:
+            if id is None:
+                await ctx.respond("Please provide a member or a user ID to check.", ephemeral=True)
+                return
+            try:
+                member = await self.bot.fetch_user(id)
+            except discord.NotFound:
+                await ctx.respond("User not found.", ephemeral=True)
+                return
+
+        for user_data in data:
+            if str(user_data['user_id']) == str(id):
+                await ctx.respond(f"{member.display_name} has been banned previously.", ephemeral=True)
+                return
+
+        await ctx.respond("No ban history for that member.", ephemeral=True)
+
+    @check_bans.error
+    async def check_bans_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.respond("Missing permissions", ephemeral=True)
+
+
+
 
 def setup(bot):
     bot.add_cog(Data(bot))
