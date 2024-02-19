@@ -64,9 +64,24 @@ class Attendance(commands.Cog):
             await ctx.message.add_reaction("🟠")
             for member in ctx.message.mentions:
                 try:
+                    await cursor.execute(f"SELECT attendanceNum FROM attendance WHERE ID={member.id}")
+                    num = await cursor.fetchone()
                     await cursor.execute(
                         f"UPDATE attendance SET attendanceNum = attendanceNum + 1 WHERE ID = {member.id}"
                     )
+                    await db.commit()
+                    await cursor.execute(f"SELECT attendanceNum FROM attendance WHERE ID={member.id}")
+                    unum = await cursor.fetchone()
+                    while unum[0] == num[0]:
+                        print("not updated correctly")
+                        await cursor.execute(f"SELECT attendanceNum FROM attendance WHERE ID={member.id}")
+                        num = await cursor.fetchone()
+                        await cursor.execute(
+                            f"UPDATE attendance SET attendanceNum = attendanceNum + 1 WHERE ID = {member.id}"
+                        )
+                        await db.commit()
+                        await cursor.execute(f"SELECT attendanceNum FROM attendance WHERE ID={member.id}")
+                        unum = await cursor.fetchone()
                     await db.commit()
                 except:  # suppress E722
                     pass
