@@ -299,6 +299,78 @@ def duration_calc(start: str, end: str) -> str:
     return durationstr
 
 
+def rank_sort(element):
+    ranks = ['MCDR', 'SCDR', 'COM', 'BCDR', 'CDR', 'GEN', 'AirCPT', 'RCMAJ', 'MAJ', 'ACPT', 'MCPO', 'CPT', 'WCDR', 'RCCPT', 'NCDR', 'LT', 'GCPT', 'RCLT', 'ARCLT', 'LTCDR', '2LT', 'RC2LT', 'NLT', 'CPO', 'SGM', 'SL', 'RCSGM', 'ASGT', 'RCSGT', 'RCCPL', 'RCPVT', 'ARC', 'RC', 'PO1', 'SGT', 'FCPT', 'PO2', 'CPL', 'FLT', 'PO3', 'LCPL', 'FO', 'PO', 'CT']
+    return ranks.index(element)
+
+async def main_list_logic(platform: str):
+    db, cursor = await connect_to_db()
+    await cursor.execute(
+        f"SELECT Members.Rank, Members.Name, Members.Designation, medbay.Type FROM members JOIN medbay ON Members.ID = medbay.userID WHERE medbay.Type IN ('LOA', 'NFFC') AND medbay.Status IN (1, 3) AND Members.ID = medbay.userID AND Members.Platform = '{platform}'")
+    lst = await cursor.fetchall()
+    lst = sorted(lst, key=lambda x: rank_sort(x[0]))
+    embed = discord.Embed(
+        title=f"{platform} Staff Medbay list",
+        color=discord.Color.embed_background(),
+        timestamp=datetime.datetime.utcnow()
+    )
+    lst = [tuple_ for tuple_ in lst if tuple_[0] not in ('CT', 'PO')]
+    officer_ranks = {'MCDR', 'SCDR', 'COM', 'BCDR', 'CDR', 'GEN', 'AirCPT', 'RCMAJ', 'MAJ', 'ACPT', 'MCPO', 'CPT',
+                     'WCDR', 'RCCPT', 'NCDR', 'LT', 'GCPT', 'RCLT', 'ARCLT', 'LTCDR', '2LT', 'RC2LT', 'NLT', 'CPO',
+                     'SGM', 'SL', 'RCSGM', 'ASGT', 'RCSGT', 'RCCPL', 'RCPVT', 'ARC', 'RC', 'PO1'}
+
+    # Initialize lists for officers and NCOs
+    officers = []
+    ncos = []
+    officers_fmt = []
+    ncos_fmt = []
+
+    # Split the filtered list into officers and NCOs
+    for e in lst:
+        if e[0] in officer_ranks:
+            officers.append(e)
+        else:
+            ncos.append((e))
+
+    for e in officers:
+        member = e[0] + " " + e[1] + " " + e[2]
+        ltype = f"**{e[3]}**"
+        officers_fmt.append(member + " : " + ltype)
+
+    officers_fmt_str = "\n".join(officers_fmt)
+
+    for e in ncos:
+        member = e[0] + " " + e[1] + " " + e[2]
+        ltype = f"**{e[3]}**"
+        ncos_fmt.append(member + " : " + ltype)
+
+    ncos_fmt_str = "\n".join(ncos_fmt)
+
+    embed.add_field(name="Officers", value="None" if officers_fmt_str == "" else officers_fmt_str, inline=False)
+    embed.add_field(name="NCOs", value="None" if ncos_fmt_str == "" else ncos_fmt_str, inline=False)
+    return embed
+
+
+class MainServerPlatformButtons(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="PC", style=discord.ButtonStyle.red, custom_id="PC_ms1")
+    async def pc_medbay_list(self, button: discord.Button, interaction: discord.Interaction):
+        embed = await main_list_logic("PC")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @discord.ui.button(label="Xbox", style=discord.ButtonStyle.green, custom_id="XBX_ms1")
+    async def xbox_medbay_list(self, button: discord.Button, interaction: discord.Interaction):
+        embed = await main_list_logic("Xbox")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @discord.ui.button(label="PS", style=discord.ButtonStyle.blurple, custom_id="PS_ms1")
+    async def ps_medbay_list(self, button: discord.Button, interaction: discord.Interaction):
+        embed = await main_list_logic("PS")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
 class Medbay(commands.Cog):
     def __init__(self, bot: DatacoreBot) -> None:
         super().__init__()
@@ -311,7 +383,7 @@ class Medbay(commands.Cog):
         self.bot.add_view(SubmitButtons())
         self.bot.add_view(MainButtons())
         self.check_lates.start()
-
+        self.bot.add_view(MainServerPlatformButtons())
     @tasks.loop(hours=24)
     async def check_lates(self):
         db, cursor = await connect_to_db()
@@ -335,6 +407,17 @@ class Medbay(commands.Cog):
                 await channel.send(
                     f"{user.mention} your leave has ended.\n**You have 24 hours to return.**"
                 )
+
+    @commands.command()
+    async def main_list(self, ctx: commands.Context):
+        main_embed = discord.Embed(
+            title="Staff Medbay List",
+            description="List of all staff on LOA or NFFC across the MilSim",
+            color=discord.Color.from_rgb(84, 91, 94)
+        )
+        view = MainServerPlatformButtons()
+        await ctx.send(embed=main_embed, view=view)
+
 
     medbay = discord.SlashCommandGroup(
         name="medbay", description="Commands for the medbay", guild_only=True
