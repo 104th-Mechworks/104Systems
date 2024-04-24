@@ -61,6 +61,14 @@ class RoleSwitcher:
 
     @staticmethod
     def decode(bitroles: int):
+        """
+        takes the bitroles and returns the roles in a list with the names formatted.
+        params:
+            bitroles: int - the bitroles representation of the roles
+
+        returns:
+            roles: list[str] - the list of roles the user has
+        """
         roles = []
         for role in BITROLES:
             if bitroles & BITROLES[role]:
@@ -68,8 +76,10 @@ class RoleSwitcher:
         return roles
 
 
-print(RoleSwitcher.encode(["assault", "rifleman"]))
-print(RoleSwitcher.decode(384))
+# testing purposes
+if __name__ == "__main__":
+    print(RoleSwitcher.encode(["assault", "rifleman"]))
+    print(RoleSwitcher.decode(384))
 
 
 

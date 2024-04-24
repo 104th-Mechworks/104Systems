@@ -1,3 +1,8 @@
+# Description: This file contains the logger configuration for the project.
+# Taken From: https://gist.github.com/hit9/5635505
+# with some modifications and custom formatting.
+
+
 import datetime
 import os
 from pathlib import Path
@@ -80,7 +85,7 @@ if len(os.listdir("logs")) > 0:
 
 log_path = f"logs/{logger.name}.log"
 file_format = logging.Formatter(
-    "[{levelname:^9}] [{asctime}] [{name}] [{module:^4}:{lineno:^4}] | {message}",
+    "[{levelname:^9}] [{asctime}] [{name}] [{module:^14}:{lineno:<5}] | {message}",
     style="{",
     datefmt="%d-%m-%y %H:%M:%S",
 )

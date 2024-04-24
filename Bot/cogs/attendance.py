@@ -10,10 +10,18 @@ from Bot.utils.DB import connect_to_db, close_db
 
 
 class ResetJSONManager:
+    """
+    Class to manage the JSON object for the reset command
+    """
     def __init__(self):
         self.json_obj = {}
 
-    def add(self, key, value):
+    def add(self, key, value) -> None:
+        """
+        Add a key/value pair to the dictionary
+        :param key: int
+        :param value: str
+        """
         if key in self.json_obj:
             # If key already exists, append the value to the existing list
             self.json_obj[key].append(value)
@@ -22,6 +30,11 @@ class ResetJSONManager:
             self.json_obj[key] = [value]
 
     def get_obj(self, key=None):
+        """
+        Get the dictionary or a specific key from the dictionary
+        :param key: (optional)
+        :return: list[str] or dict
+        """
         if key is None:
             # If no key is specified, return the entire dictionary
             return self.json_obj
@@ -34,14 +47,16 @@ class ResetJSONManager:
 
 
 def reset_embed_generator(json_obj) -> discord.Embed:
-    # Create a new embed
+    """
+    Creates the embed message that contains list of members and their attendance
+    """
     embed = discord.Embed(
         title="Attendance Reset",
         description="Attendance has been reset for the following members:",
         color=discord.Color.green(),
     )
 
-    # Iterate through the dictionary and add each key/value pair to the embed
+    # Iterates through the dictionary and add each key/value pair to the embed
     for key, value in json_obj.items():
         values = "\n".join(value)
         embed.add_field(name=f"Attendance: {key}", value=values, inline=False)
@@ -55,38 +70,48 @@ class Attendance(commands.Cog):
 
     @commands.command(name="attendance")
     async def attendance(self, ctx: commands.Context):
+        # checks there is at least 1 member to log attendance for
         if len(ctx.message.mentions) == 0:
             msg = await ctx.reply("Must have at least 1 member mentioned")
             await msg.delete(delay=5)
             return
         else:
             db, cursor = await connect_to_db()
-            await ctx.message.add_reaction("🟠")
+            # if this reaction isn't removed the user knows there has been a problem
+            await ctx.message.add_reaction(b'\xf0\x9f\x9f\xa0'.decode())
             for member in ctx.message.mentions:
+                counter = 0
                 try:
-                    await cursor.execute(f"SELECT attendanceNum FROM attendance WHERE ID={member.id}")
+                    await cursor.execute("SELECT attendanceNum FROM attendance WHERE ID=?", (member.id,))
                     num = await cursor.fetchone()
                     await cursor.execute(
-                        f"UPDATE attendance SET attendanceNum = attendanceNum + 1 WHERE ID = {member.id}"
+                        "UPDATE attendance SET attendanceNum = attendanceNum + 1 WHERE ID = ?", (member.id,)
                     )
                     await db.commit()
-                    await cursor.execute(f"SELECT attendanceNum FROM attendance WHERE ID={member.id}")
+                    await cursor.execute("SELECT attendanceNum FROM attendance WHERE ID=?", (member.id,))
                     unum = await cursor.fetchone()
-                    while unum[0] == num[0]:
+                    # if fails try until it updates the record for the specified member (usually due to file locking)
+                    while (unum[0] == num[0]) and (counter < 5):
+                        counter += 1
                         print("not updated correctly")
-                        await cursor.execute(f"SELECT attendanceNum FROM attendance WHERE ID={member.id}")
+                        await cursor.execute("SELECT attendanceNum FROM attendance WHERE ID=?", (member.id,))
                         num = await cursor.fetchone()
                         await cursor.execute(
-                            f"UPDATE attendance SET attendanceNum = attendanceNum + 1 WHERE ID = {member.id}"
+                            "UPDATE attendance SET attendanceNum = attendanceNum + 1 WHERE ID = ?", (member.id,)
                         )
                         await db.commit()
-                        await cursor.execute(f"SELECT attendanceNum FROM attendance WHERE ID={member.id}")
+                        await cursor.execute("SELECT attendanceNum FROM attendance WHERE ID=?", (member.id,))
                         unum = await cursor.fetchone()
                     await db.commit()
-                except:  # suppress E722
+                    if counter == 5:
+                        await ctx.message.remove_reaction(b'\xf0\x9f\x9f\xa0'.decode(), ctx.guild.me)
+                        await ctx.message.add_reaction(b'\xe2\x9d\x8c'.decode())
+                        await ctx.send(f"Failed to update {member.display_name}'s attendance, previous members were updated")
+                        return
+                except:  # suppress E722 (blank exception clause)
                     pass
-            await ctx.message.remove_reaction("🟠", ctx.guild.me)
-            await ctx.message.add_reaction("✅")
+            await ctx.message.remove_reaction(b'\xf0\x9f\x9f\xa0'.decode(), ctx.guild.me)
+            await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode())
             return
 
     att = discord.SlashCommandGroup(
@@ -100,6 +125,10 @@ class Attendance(commands.Cog):
         role: discord.Role,
         channel: discord.TextChannel,
     ):
+        """
+        selects the channel to which the control messages are sent and which role is associated with that platoon
+        or company. Only members with the chosen role are reset
+        """
         db, cursor = await connect_to_db("main.sqlite")
         await cursor.execute(
             f"SELECT AchannelID, attwatchrole FROM ServerConfig WHERE ID = {ctx.guild.id}"
@@ -124,6 +153,9 @@ class Attendance(commands.Cog):
         name="reset", description="Resets attendance for members in the server"
     )
     async def _reset(self, ctx: discord.ApplicationContext):
+        """
+        resets attendance for all members in the server with the specified role from the setup command
+        """
         await ctx.defer()
 
         resettingEmbed = discord.Embed(
@@ -179,15 +211,6 @@ class Attendance(commands.Cog):
             """
             ) as cursor:
                 previous_value = await cursor.fetchone()
-            # add member name to the dictionary where the key is the previous value
-            # if the key already exists add the member name to the list associated with the key
-            # if the key doesn't exist create a new list with the member name
-            # if previous_value[0] in reset:
-            #     reset[previous_value[0]].append(member.display_name)
-            # else:
-            #     reset[previous_value[0]] = [member.display_name]
-
-            # Update the record and set the 'attendanceNum' field to 0
             await db.execute(
                 f"""
                 UPDATE attendance
@@ -200,10 +223,10 @@ class Attendance(commands.Cog):
 
             # Commit the changes
             await db.commit()
-            await cursor.close()
-            await db.close()
-            
             attendance_result.add(previous_value[0], member.display_name)
+
+        await cursor.close()
+        await db.close()
         await ctx.respond("Reset attendance for all members in the server")
         # logger.success(f"Attendance Reset: {ctx.guild.name}")
         embed = reset_embed_generator(attendance_result.sort().get_obj())
@@ -215,7 +238,12 @@ class Attendance(commands.Cog):
     @att.command(name="view", description="View attendance for a member")
     async def _view(
         self, ctx: discord.ApplicationContext, member: discord.Member = None
-    ):
+    ) -> None:
+        """
+        Command to view the attendance of a member
+
+        :param member: discord.Member - The member to view the attendance of
+        """
         db, cursor = await connect_to_db("main.sqlite")
         if member is None:
             member = ctx.author
@@ -233,8 +261,16 @@ class Attendance(commands.Cog):
             await ctx.respond(f"{member.display_name} has attended {result[0]} events")
         return
 
+    # debugging commands. These are not meant to be used in production
+
     @commands.command()
     async def set_att(self, ctx: commands.Context, member: discord.Member, num: int):
+        """
+        Manually set attendance number for specified member
+        :param ctx: commands.Context
+        :param member: discord.Member
+        :param num: int
+        """
         db, cursor = await connect_to_db("main.sqlite")
         await cursor.execute(
             f"UPDATE attendance SET attendanceNum = {num} WHERE ID = {member.id}"

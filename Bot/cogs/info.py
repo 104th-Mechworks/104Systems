@@ -5,8 +5,6 @@ from Bot.DatacoreBot import DatacoreBot
 
 log = logging.getLogger("Datacore")
 
-bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
-
 
 class MainButtonsView(discord.ui.View):
     def __init__(self):
@@ -75,6 +73,8 @@ class PositionsInfo(discord.ui.View):
         max_values=1,
         custom_id="HPSM",
         options=[
+            discord.SelectOption(label="Branch Commanding Officer", value="BCO"),
+            discord.SelectOption(label="Console Commanding Officer", value="MCCO"),
             discord.SelectOption(label="Company Commanding Officer", value="HCCO"),
             discord.SelectOption(label="Company Executive Officer", value="HCXO"),
             discord.SelectOption(
@@ -1353,7 +1353,9 @@ class RulesSelect(discord.ui.View):
             view = RulesSelectBack()
             await interaction.response.edit_message(embed=embed, view=view)
         elif select.values[0] == "staff":
-            if interaction.user.guild_permissions.administrator:
+            if (1198378556338737193 or 1198378556321964135) in [
+                role.id for role in interaction.user.roles
+            ]:
                 embed = discord.Embed(
                     title="**Staff Rules**",
                     description="Please select which section of staff rules you would like to view",
@@ -1380,7 +1382,7 @@ class backRankOptionsView(discord.ui.View):
         embed = discord.Embed(
             title="**Ranks**",
             description="The 104th offers a range of positions in different aspects of the milsim",
-            color=0x26C9BE,
+            color=0x838181,
         )
         view = MilsimRanksSelect()
         await interaction.response.edit_message(embed=embed, view=view)
@@ -1448,6 +1450,11 @@ class MilsimRanksSelect(discord.ui.View):
             armyRanksEmbed.add_field(
                 name=" <:2LT:1148647496965431348> 2nd Lieutenant: 2LT",
                 value="Works under Captain helping run companies and train Sergeant Majors.",
+                inline=False,
+            )
+            armyRanksEmbed.add_field(
+                name="<:WO:1210738936809529405> Warrant Officer: WO",
+                value=f"Each Warrant Officer has the own assigned department they run and over see, they can also be placed on assignment by command staff.\nWarrant Officer is only available my appointment by the Marshal Commander",
                 inline=False,
             )
             armyRanksEmbed.add_field(
@@ -1585,16 +1592,6 @@ class MilsimRanksSelect(discord.ui.View):
                 value=f"Advisor or 2nd to the Marshal Commander",
                 inline=False,
             )
-            fleetCommandRanksEmbed.add_field(
-                name="<:MCPO:1148647009595699291> Master Chief Petty Officer: MCPO",
-                value=f"Master Chief Petty Officer is in charge of All Disciplinary action.",
-                inline=False,
-            )
-            fleetCommandRanksEmbed.add_field(
-                name="<:PO1:1148648158218424401> Chief Petty Officer: CPO",
-                value=f"Helps assist the MCPO in Disciplinary action and appeals. Fleet Administrator.",
-                inline=False,
-            )
             await interaction.response.edit_message(
                 embed=fleetCommandRanksEmbed, view=view
             )
@@ -1605,18 +1602,18 @@ class MilsimRanksSelect(discord.ui.View):
                 color=0xEC0AC6,
             )
             arcRanksEmbed.add_field(
-                name="<:GEN:1148649066339778560> ARC General: AGEN",
-                value=f"Runs Arc operations on board the Arquitens Class Command Cruiser The Ravager.",
+                name="<:CDR:1148647028172275772> ARC Commander: ACDR",
+                value=f"In charge of the Advanced Recon Commando Program and is part of Command staff. Same power as Commanders.",
                 inline=False,
             )
             arcRanksEmbed.add_field(
-                name="<:ACDR:1148648792044867595> ARC Commander: ACDR",
-                value=f"In charge of the ACPTs and is part of Command staff. Same power as Commanders.",
+                name="<:AMAJ:1231706018925510696> ARC Major: AMAJ",
+                value=f"2nd in Command of the ARC Program and advisor to the ACDR. Same power as Majors.",
                 inline=False,
             )
             arcRanksEmbed.add_field(
                 name="<:ACPT1:1148648892150333493> ARC Captain: ACPT",
-                value=f"In charge of Arc Troopers and checks their respective consoles and Lieutenants. Has the same power as Captains.",
+                value=f"In charge of Arc Troopers and checks their respective consoles and Lieutenants. Has the same power as Captains and is a member of command staff.",
                 inline=False,
             )
             arcRanksEmbed.add_field(
@@ -1670,12 +1667,11 @@ class MilsimRanksSelect(discord.ui.View):
 
 
 class Info(commands.Cog):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: DatacoreBot) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
-        log.info("Info cog ready")
         self.bot.add_view(MainButtonsView())
         self.bot.add_view(PositionsInfo())
         self.bot.add_view(PositionsInfoBack())
@@ -1708,7 +1704,7 @@ class Info(commands.Cog):
         await ctx.message.delete()
         embed = discord.Embed(
             title="**104th Battalion Milsim**",
-            description="Welcome to the largest Battlefront 2 milsim\nHere you will find all of the information and relevent policies for the 104th Battalion",
+            description="Welcome to the largest Battlefront 2 milsim\nHere you will find all of the information and relevant policies for the 104th Battalion",
             color=0x838181,
         )
         embed.set_thumbnail(
@@ -1716,6 +1712,22 @@ class Info(commands.Cog):
         )
         embed.set_footer(text="104th Battalion Milsim")
         view = MainButtonsView()
+        view.add_item(
+            discord.ui.Button(
+                emoji="<:mainserver:1212327738816593970>",
+                style=discord.ButtonStyle.grey,
+                url="https://www.104thbattalionmilsim.com/",
+                row=2,
+            )
+        )
+        view.add_item(
+            discord.ui.Button(
+                emoji="<:insta:1212314299704283206>",
+                style=discord.ButtonStyle.grey,
+                url="https://www.instagram.com/104th_battalion_milsim_media/",
+                row=2,
+            )
+        )
         await ctx.send(embed=embed, view=view)
 
 

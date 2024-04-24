@@ -23,7 +23,24 @@ def role_select(ctx: discord.AutocompleteContext):
                 "Anti-Armour Cadre", "Head Anti-Armour Cadre"
                     ]
         case "Marksman":
-            pass
+            return [
+                "Marksman", "Advanced Marksman", "Marksman Instructor", "Advanced Marksman Instructor", "Marksman Cadre",
+                "Head Marksman Cadre"
+                    ]
+        case "Rifleman":
+            return [
+                "Rifleman", "Advanced Rifleman", "Rifleman Instructor", "Advanced Rifleman Instructor", "Rifleman Cadre",
+                "Head Rifleman Cadre"
+                    ]
+        case "ARC":
+            return [
+                "ARC Candidate", "Advanced Recon Commando", "ARC Instructor", "ARC Cadre", "Head ARC Cadre"
+                    ]
+        case "RC":
+            return [
+                "RC Candidate", "Republic Commando", "RC Instructor", "RC Cadre", "Head RC Cadre"
+                    ]
+
 
 
 class KMC(commands.Cog):
@@ -39,5 +56,5 @@ class KMC(commands.Cog):
         pass
 
 
-def setup(bot: DatacoreBot):
-    bot.add_cog(KMC(bot))
+# def setup(bot: DatacoreBot):
+#     bot.add_cog(KMC(bot))

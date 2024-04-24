@@ -160,14 +160,16 @@ def position_sort(element):
     return positions.index(element)
 
 def rank_sort(element):
-    ranks = ['MCDR', 'SCDR', 'COM', 'BCDR', 'CDR', 'GEN', 'AirCPT', 'RCMAJ', 'MAJ', 'ACPT', 'MCPO', 'CPT', 'WCDR', 'RCCPT', 'NCDR', 'LT', 'GCPT', 'RCLT', 'ARCLT', 'LTCDR', '2LT', 'RC2LT', 'NLT', 'CPO', 'SGM', 'SL', 'RCSGM', 'ASGT', 'RCSGT', 'RCCPL', 'RCPVT', 'ARC', 'RC', 'PO1', 'SGT', 'FCPT', 'PO2', 'CPL', 'FLT', 'PO3', 'LCPL', 'FO', 'PO', 'CT']
+    ranks = ['MCDR', 'SCDR', 'COM', 'BCDR', 'CDR', 'GEN', 'AirCPT', 'RCMAJ', 'MAJ', 'ACPT', 'MCPO', 'CPT', 'WCDR', 'RCCPT', 'NCDR', 'LT', 'GCPT', 'RCLT', 'ARCLT', 'LTCDR', '2LT', 'RC2LT', 'NLT', 'WO', 'SGM', 'SL', 'RCSGM', 'ASGT', 'RCSGT', 'RCCPL', 'RCPVT', 'ARC', 'RC', 'PO1', 'SGT', 'FCPT', 'PO2', 'CPL', 'FLT', 'PO3', 'LCPL', 'FO', 'PO', 'CT']
     return ranks.index(element)
+
 
 def is_allowed(ctx):
     allowed_users = [618502892449693727, 434076591052685322]  # Example list of allowed user IDs
     is_admin = ctx.author.permissions.administrator
     is_allowed = ctx.author.id in allowed_users
     return is_admin or is_allowed
+
 
 class Data(commands.Cog):
     def __init__(self, bot: DatacoreBot):
@@ -351,6 +353,7 @@ class Data(commands.Cog):
             color=colour,
             description=f"**RANK**: {rank_switcher(rnd[0])}\n**DESIGNATION**: {rnd[2]}",
         )
+        # check the member has mfa enabled
         if rnd[3] is not None:
             rnd_embed.add_field(name="Branch", value=rnd[3], inline=False)
         else:
@@ -405,19 +408,24 @@ class Data(commands.Cog):
                 kmc_embed.add_field(
                     name="Special Operations Division", value=kmc[5], inline=False
                 )
-
+        """
+        C-Shop feature has been temporarily removed
+        Due to ongoing changes and restructuring.
+        Will be added back with relevant changes once final structure hans been
+        decided by RAS Vanguard staff.
+        """
         page_groups = []
         rnd_page = PageGroup(
             pages=[rnd_embed], label="Main Info Page", use_default_buttons=False
         )
-        cshop_page = PageGroup(
-            pages=[cshop_embed], label="C-Shop Info Page", use_default_buttons=False
-        )
+        # cshop_page = PageGroup(
+        #     pages=[cshop_embed], label="C-Shop Info Page", use_default_buttons=False
+        # )
         kmc_page = PageGroup(
             pages=[kmc_embed], label="KMC Info Page", use_default_buttons=False
         )
         page_groups.append(rnd_page)
-        page_groups.append(cshop_page)
+        # page_groups.append(cshop_page)
         page_groups.append(kmc_page)
 
         paginator = Paginator(
@@ -463,6 +471,7 @@ class Data(commands.Cog):
         else:
             await ctx.respond(f"{name} is not a valid CT name", ephemeral=True)
 
+    @commands.is_owner()
     @data.command(name="remove", description="Remove a member from the database")
     async def _remove(self, ctx: discord.ApplicationContext, member: discord.Member):
         db, cursor = await connect_to_db()
@@ -482,43 +491,6 @@ class Data(commands.Cog):
                 f"{member.name} does not exist in the database", ephemeral=True
             )
 
-    @data.command(name="platoon", description="Get info on a platoon")
-    @option(
-        "branch",
-        description="Branch the member belongs to",
-        choices=[
-            "Army",
-            "Starfighter Corps",
-            "Naval Auxiliary",
-            "Special Operations Force",
-            "Fleet Command",
-            "None",
-        ],
-    )
-    @option(
-        "company",
-        description="Company the member belongs to",
-        autocomplete=company_autocomplete,
-        required=True,
-    )
-    @option(
-        "platoon",
-        description="Platoon the member belongs to",
-        autocomplete=platoon_autocomplete,
-        required=True,
-    )
-    async def _get_platoon(
-        self, ctx: discord.ApplicationContext, branch: str, company: str, platoon: str
-    ):
-        company = await company_name_switcher(company)
-        db, cursor = await connect_to_db()
-        await cursor.execute(
-            f"SELECT Members.Rank, Members.Name, Members.Designation, Members.Position FROM Members WHERE Platoon = '{platoon}' AND Company = '{company}'"
-        )
-        r = await cursor.fetchall()
-        print(r)
-        r = sorted(r,key=position_sort(r[i][3]))
-        pass
 
     @data.command()
     async def check_bans(self, ctx: discord.ApplicationContext, member: discord.Member = None, id=None):
@@ -555,8 +527,22 @@ class Data(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             await ctx.respond("Missing permissions", ephemeral=True)
 
-
-
+    @commands.is_owner()
+    @commands.command()
+    async def rdct(self, ctx: commands.Context):
+        # create a json file with the role name: role.id
+        s=None
+        if ctx.guild.id == 1198379770967244840:
+            s= "resilient_"
+        elif ctx.guild.id == 1198380200279425084:
+            s= "triumphant_"
+        roles = {}
+        sroles = await ctx.guild.fetch_roles()
+        for role in sroles:
+            roles[role.name] = role.id
+        with open(f"{s}roles.json", "w") as f:
+            json.dump(roles, f, indent=4)
+            return
 
 def setup(bot):
     bot.add_cog(Data(bot))

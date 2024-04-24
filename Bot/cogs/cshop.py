@@ -172,4 +172,3 @@ class CShop(commands.Cog):
 
 def setup(bot: DatacoreBot):
     bot.add_cog(CShop(bot))
-    log.info("Loaded cshop.py")

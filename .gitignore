@@ -169,3 +169,6 @@ testing.ipynb
 .icons/
 .icons
 bans.json
+.dev/
+.dev
+temp.py

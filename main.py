@@ -1,15 +1,16 @@
 from argparse import ArgumentParser
-import asyncio
 import logging
 import discord
 import os
 from dotenv import load_dotenv
 from Bot.DatacoreBot import DatacoreBot
-from Bot.utils.DB import connect_to_db
-from discord.ext import commands
-import re
+
 
 load_dotenv()
+
+
+logger = logging.getLogger("Datacore")
+
 
 bot = DatacoreBot(
     command_prefix=".",
@@ -17,21 +18,26 @@ bot = DatacoreBot(
     strip_after_prefix=True,
     intents=discord.Intents.all(),
     activity=discord.Activity(
-        type=discord.ActivityType.watching, name="104th Battalion"
+        type=discord.ActivityType.custom, name="Maintenance..."
     ),
-    status=discord.Status.dnd,
+    status=discord.Status.idle,
 )
 
-
-
-exp = r"^([A-Z0-9]{2,4}) ([A-ZÁÉÍÓÚÜ][A-ZÁÉÍÓÚÜa-záéíóúü]+) ((?:[A-Z]{1,3}-)(?:(?:[0-9]{4,5})|(?:[0-9]{2}-[0-9]{3})|(?:\d+-\d+\/\d+)|(?:\d+-\d{4})))$"
-
-
+# function to load all cogs before bot starts
 def pre_start():
-    bot.load_extensions("Bot.cogs", recursive=True)
+    # bot.load_extensions("Bot.cogs", recursive=True)
+    cogdir = os.path.join(os.path.dirname(__file__), "Bot", "cogs")
+    for cog in os.listdir(cogdir):
+        if cog.endswith(".py"):
+            try:
+                bot.load_extension(f"Bot.cogs.{cog[:-3]}")
+            except Exception as e:
+                logger.error(f"Failed to load cog {cog[:-3]}: {e}")
 
 
 if __name__ == "__main__":
+    # basic CLI interface for starting the bot with different parameters
+
     parser = ArgumentParser(prog="Datacore")
     parser.add_argument(
         "-d",
@@ -41,21 +47,24 @@ if __name__ == "__main__":
         nargs="*",
         help="run in debug mode",
     )
+
     parser.add_argument(
-        "-s",
-        "--sync",
-        action="store_true",
-        help="synchronize commands",
+        "-m",
+        "--main",
+        action="extend",
+        help="run in main bot",
     )
     args = parser.parse_args()
     debug = args.cogs is not None
 
+    # load environment variables
     load_dotenv(".env")
 
-    logger = logging.getLogger("Datacore")
-    # logger.setLevel(logging.DEBUG if debug else logging.INFO)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG if debug else logging.INFO)
+
+    # load necessary files before bot starts
     pre_start()
-    # bot.run("MTA3ODI0OTAzMzU0NzY2NTQ4OQ.GPko32.7DLzajDZqQ1O5yskoXRgbu5Z25ioErhq0J6zAk")
-    bot.run("OTMzMjkxNTUxNzQyOTA2NDA4.GztRJL.qqZj2QkkU9gq6C2Qzq3dDaJRv9gL1Fq0Ot13Yk")
-    
+
+    # Starts the bot and connects to Discord API
+    bot.run(os.getenv("MAIN_TOKEN" if not debug else "DEBUG_TOKEN"))
+

@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+
 # import os
 from contextlib import suppress
 
@@ -9,10 +10,11 @@ import discord
 import pomice
 from discord import ApplicationContext, DiscordException
 from discord.ext import commands
-from discord.ext.commands import Context, errors
+from discord.ext.commands import errors
 from dotenv import load_dotenv
 
 # from Bot.utils.DB import connect_to_db
+from Bot.utils.handlers import command_error_handler
 from Bot.utils.logger import logger as log
 
 load_dotenv()
@@ -23,6 +25,11 @@ log.setLevel(logging.DEBUG)
 
 
 class DatacoreBot(commands.Bot):
+    """
+    Main Bot Class for the Datacore Bot, this handles start up and connection to the Lavalink nodes.
+    Also handles command errors that are not handled by the cogs directly.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.first_start = True
@@ -86,17 +93,13 @@ class DatacoreBot(commands.Bot):
             await self.read_nodes()
             self.first_start = False
 
-    async def on_command_error(
-        self, ctx: commands.Context, exception: errors.CommandError
-    ) -> None:
+    async def on_command_error(self, ctx: commands.Context, exception) -> None:
         if isinstance(exception, errors.CommandNotFound):
             suppress(errors.CommandNotFound)
-            return
         else:
-            log.error(exception)
+            await command_error_handler(ctx, exception)
 
     async def on_application_command_error(
-        self, context: ApplicationContext, exception: DiscordException
+        self, ctx: ApplicationContext, exception: DiscordException
     ) -> None:
-        if isinstance(exception, asyncio.TimeoutError):
-            log.error(exception)
+        await command_error_handler(ctx, exception)
