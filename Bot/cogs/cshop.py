@@ -65,19 +65,18 @@ class CShopObjectHandler:
 
 
 async def team_switcher(team):
-    match team:
-        case "Administration":
-            return "admin"
-        case "Vanguard Security":
-            return "vanguard_security"
-        case "Kaminoan Security Force":
-            return "KSF"
-        case "104th Security":
-            return "Desert"
-        case "Art Team":
-            return "art_team"
-        case _:
-            return None
+    if team == "Administration":
+        return "admin"
+    elif team == "Vanguard Security":
+        return "vanguard_security"
+    elif team == "Kaminoan Security Force":
+        return "KSF"
+    elif team == "104th Security":
+        return "Desert"
+    elif team == "Art Team":
+        return "art_team"
+    else:
+        return None
 
 
 class CShop(commands.Cog):

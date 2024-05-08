@@ -77,6 +77,8 @@ def rank_switcher(rank: str) -> str:
             return "Sergeant"
         case "SGM":
             return "Sergeant Major"
+        case "WO":
+            return "Warrant Officer"
         case "2LT":
             return "2nd Lieutenant"
         case "LT":

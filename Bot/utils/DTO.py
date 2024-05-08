@@ -87,4 +87,5 @@ class FullMemberDTO(BaseDTO):
 
 instance = FullMemberDTO()
 
-asyncio.run(instance.get(member_id=434076591052685322))
+if __name__ == "__main__":
+    asyncio.run(instance.get(member_id=434076591052685322))

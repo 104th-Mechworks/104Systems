@@ -66,5 +66,5 @@ if __name__ == "__main__":
     pre_start()
 
     # Starts the bot and connects to Discord API
-    bot.run(os.getenv("MAIN_TOKEN" if not debug else "DEBUG_TOKEN"))
+    bot.run(os.getenv("DEBUG_TOKEN" if not debug else "DEBUG_TOKEN"))
 

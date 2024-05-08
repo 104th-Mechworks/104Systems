@@ -303,29 +303,35 @@ class Data(commands.Cog):
     ):
         db, cursor = await connect_to_db()
         query = "UPDATE Members SET "
+        if re.match(FULL, member.display_name):
+            CT = member.display_name.split(sep=" ")
+            designation: str = CT[2]
+            rank: str = CT[0]
+            query += f"Rank = '{rank}', Designation = '{designation}', "
         if branch is not None:
             if branch == "None":
                 branch = None
-            query += f"Branch = '{branch}',"
+            query += f"Branch = '{branch}', "
         if company is not None:
             if company == "None":
                 company = None
-            query += f"Company = '{company}',"
+            query += f"Company = '{company}', "
         if platoon is not None:
             if platoon == "None":
                 platoon = None
-            query += f"Company = '{platoon}',"
+            query += f"Company = '{platoon}', "
         if position is not None:
             if position == "None":
                 position = None
-            query += f"Position = '{position}',"
+            query += f"Position = '{position}', "
 
-        query = query.rstrip(",") + f" WHERE ID = {member.id}"
+        query = query.rstrip(", ") + f" WHERE ID = {member.id}"
 
         await cursor.execute(query)
         await db.commit()
         await close_db(db, cursor)
         await ctx.respond(f"Updated {member.name}'s data", ephemeral=True)
+        print(query)
 
     @data.command(name="get", description="Get member from the database")
     async def _get(self, ctx: discord.ApplicationContext, member: discord.Member):

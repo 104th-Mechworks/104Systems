@@ -380,7 +380,7 @@ class ExtendModal(discord.ui.Modal):
             )
             return
         await cursor.execute(
-            f"UPDATE medbay SET endDate = {self.children[0].value} WHERE channelID = {interaction.channel.id}"
+            f"UPDATE medbay SET endDate = '{self.children[0].value}' WHERE channelID = {interaction.channel.id}"
         )
         await db.commit()
         await cursor.close()
@@ -418,7 +418,7 @@ class Close2Options(discord.ui.View):
             days_late = (datetime.datetime.today() - end_date).days
             new_end_date = datetime.datetime.today().strftime("%d-%m-%Y")
             await cursor.execute(
-                f"UPDATE medbay SET endDate = {new_end_date}, Status = {4} WHERE UserID = {member.id} AND Status = {3}"
+                f"UPDATE medbay SET endDate = '{new_end_date}', Status = {4} WHERE UserID = {member.id} AND Status = {3}"
             )
             await db.commit()
 
@@ -749,7 +749,7 @@ class Medbay(commands.Cog):
             new_end_date = datetime.datetime.today().strftime("%d-%m-%Y")
             print(new_end_date)
             await cursor.execute(
-                f"UPDATE medbay SET endDate = {new_end_date}, Status = {4} WHERE UserID = {member.id} AND Status = {3}"
+                f"UPDATE medbay SET endDate = '{new_end_date}', Status = {4} WHERE UserID = {member.id} AND Status = {3}"
             )
             await db.commit()
             await ctx.respond(
@@ -832,7 +832,7 @@ class Medbay(commands.Cog):
         self,
         ctx: discord.ApplicationContext,
         date: str,
-        member: discord.Member | None = None,
+        member: discord.Member = None,
     ):
         await ctx.defer()
         Qdate = date_check(date)

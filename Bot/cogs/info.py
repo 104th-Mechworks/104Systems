@@ -93,7 +93,14 @@ class PositionsInfo(discord.ui.View):
     )
     async def select_callback(self, select, interaction: discord.Interaction):
         view = PositionsInfoBack()
-        if select.values[0] == "HCCO":
+        if select.values[0] == "MCCO":
+            embed = discord.Embed(
+                title="Console Commanding Officer",
+                description="The  Commanding Officer (usually a MAJ) is responsible for all the companies on their assigned platfrm (Xbox, Playstaation and PC). They work closely with the CPTs and liase with the CDRs and the BCDR, ensuring thier platform is running smoothly and efficiently.",
+                color=discord.Color.from_rgb(105, 103, 103),
+            )
+            await interaction.response.edit_message(embed=embed, view=view)
+        elif select.values[0] == "HCCO":
             embed = discord.Embed(
                 title="Company Commanding Officer",
                 description="The Company Commanding Officer (usually a CPT) is responsible to ensure the companies operations are running smoothly.They oversee all the platoons that reside within the company. Staff and troopers alike. They determine and direct towards the companies objectives. Weekly status updates are given to Battalion Command to monitor the state of the Company.",
@@ -222,7 +229,7 @@ class ClassesSelect(discord.ui.View):
                 inline=False,
             )
             embed.set_image(
-                url="https://cdn.discordapp.com/attachments/702992440935579669/1147611935454535690/STAR_WARSTM_BattlefrontTM_II-85e9bc00-5d94-4163-a5e4-aaa872d7c0ce.png"
+                url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716767892176987/assault.png?ex=663ca911&is=663b5791&hm=d2c1f39c27a53c293108798e9e92bce2b02ff087226b97e5469ae9b15f4cbdb0&"
             )
             view = AssaultPageOptions()
             await interaction.response.edit_message(embed=embed, view=view)
@@ -250,7 +257,7 @@ class ClassesSelect(discord.ui.View):
                 inline=False,
             )
             embed.set_image(
-                url="https://cdn.discordapp.com/attachments/702992440935579669/1147612191269335100/STAR_WARSTM_BattlefrontTM_II-c849770d-db02-44f3-9642-67df0679c49d.png"
+                url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716769217581159/heavy.png?ex=663ca911&is=663b5791&hm=208345ca08dff585dcaeee55aadb569b12fc711501d76c4ea097deaf71ea4c56&"
             )
             view = HeavyPageOptions()
             await interaction.response.edit_message(embed=embed, view=view)
@@ -276,7 +283,7 @@ class ClassesSelect(discord.ui.View):
                 inline=False,
             )
             embed.set_image(
-                url="https://cdn.discordapp.com/attachments/702992440935579669/1147612340485886052/STAR_WARSTM_BattlefrontTM_II-f8859729-4be0-4247-a9f8-2a5624485571.png"
+                url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716809826959400/specialist.png?ex=663ca91b&is=663b579b&hm=71b0e2b13f874bf7f0abcb3784573f26ca11e51a8cdfaa0a3c98651c680b1a17&"
             )
             view = SpecialistOptions()
             await interaction.response.edit_message(embed=embed, view=view)
@@ -309,7 +316,7 @@ class ClassesSelect(discord.ui.View):
                 inline=False,
             )
             embed.set_image(
-                url="https://cdn.discordapp.com/attachments/702992440935579669/1147617413064568923/3846ac8afe9e52c9c5145ebcece5855d_2.png"
+                url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716766025711626/Aerial.png?ex=663ca910&is=663b5790&hm=8e07ea8a4fb42b17fbb674fe929b72b1c83583db17745308bad215de976204a6&"
             )
             view = AerialOptions()
             await interaction.response.edit_message(embed=embed, view=view)
@@ -333,7 +340,7 @@ class ClassesSelect(discord.ui.View):
                     inline=False,
                 )
                 .set_image(
-                    url="https://cdn.discordapp.com/attachments/702992440935579669/1147617369661919292/ARF.png"
+                    url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716767208509493/ARF.png?ex=663ca910&is=663b5790&hm=ee918dc4ccb6793c90bd8338395e7653c76332bf15981bfe3f476d59f95d4875&"
                 )
             )
             view = ARFOptions()
@@ -359,7 +366,7 @@ class ClassesSelect(discord.ui.View):
                     inline=False,
                 )
                 .set_image(
-                    url="https://cdn.discordapp.com/attachments/702992440935579669/1147617240385069116/STAR_WARSTM_BattlefrontTM_II-d9560e7a-5442-44c2-bbe8-a7b0de779dd6.png"
+                    url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716766634016768/ARC.png?ex=663ca910&is=663b5790&hm=644867f35f4bc0163ed355eaa6d6b2617e493d0493da3718083f40c4746e239f&"
                 )
             )
             view = ARCOptions()
@@ -385,7 +392,7 @@ class ClassesSelect(discord.ui.View):
                     inline=False,
                 )
                 .set_image(
-                    url="https://cdn.discordapp.com/attachments/702992440935579669/1147617294231539853/My_Great_Capture_Screenshot_2019-09-25_19-38-28.png"
+                    url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716768475316265/Commando.png?ex=663ca911&is=663b5791&hm=23ece2155e43021f7bd4dcc7fc4b24bf41026aa81364789619482e559729e50e&"
                 )
             )
             view = CommandoOptions()
@@ -411,7 +418,7 @@ class ClassesSelect(discord.ui.View):
                 inline=False,
             )
             embed.set_image(
-                url="https://cdn.discordapp.com/attachments/702992440935579669/1148034257076367440/Star_Wars_Battlefront_II_2017_Screenshot_2021.png"
+                url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716810921676871/VWing.png?ex=663ca91b&is=663b579b&hm=f0ce0b46ec382708c318dc19bd7260c0917ebfd34b0c51c86eef61aaf9838ab5&"
             )
             view = VwingOptions()
             await interaction.response.edit_message(embed=embed, view=view)
@@ -436,7 +443,7 @@ class ClassesSelect(discord.ui.View):
                 inline=False,
             )
             embed.set_image(
-                url="https://cdn.discordapp.com/attachments/702992440935579669/1148034169084055714/Star_Wars_Battlefront_II_2017_Screenshot_2021.png"
+                url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716811416600626/YWing.png?ex=663ca91b&is=663b579b&hm=bca871b83827f35423ce18c59312e61db2f7193d9e252c126722297e564989e8&"
             )
             view = YwingOptions()
             await interaction.response.edit_message(embed=embed, view=view)
@@ -462,7 +469,7 @@ class ClassesSelect(discord.ui.View):
                     inline=False,
                 )
                 .set_image(
-                    url="https://cdn.discordapp.com/attachments/702992440935579669/1148034358473658398/Star_Wars_Battlefront_II_2017_Screenshot_2021.png"
+                    url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716764800974908/A-170.png?ex=663ca910&is=663b5790&hm=415988c1986491d1150097cd0ffe29e322ce4e6951b93fd259daf83e7b0bfb85&"
                 )
             )
             view = ARC170Options()
@@ -612,7 +619,7 @@ class ATRTOptions(discord.ui.View):
                 inline=False,
             )
             .set_image(
-                url="https://cdn.discordapp.com/attachments/702992440935579669/1147617369661919292/ARF.png"
+                url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716767208509493/ARF.png?ex=663ca910&is=663b5790&hm=ee918dc4ccb6793c90bd8338395e7653c76332bf15981bfe3f476d59f95d4875&"
             )
         )
         view = ARFOptions()
@@ -675,7 +682,7 @@ class OfficerOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147612441337942016/STAR_WARSTM_BattlefrontTM_II-b0ceb989-7019-4c0e-bffb-a92abb48395f.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716770203369502/NavalOfficer.png?ex=663ca911&is=663b5791&hm=ce43473b74bf8ac30e269d3a2a0f32535345163ace9a35170715b88849a35a10&"
         )
         self.enable_all_items()
         button.disabled = True
@@ -709,7 +716,7 @@ class OfficerOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147617149360287804/STAR_WARSTM_BattlefrontTM_II-74510430-60b5-4187-a7ab-4ff984e2e01c.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716808321208330/NCOOfficer.png?ex=663ca91a&is=663b579a&hm=c83aee0ccecc3a8d219ccccdba4aa49f767beff52823e4291e8985edfaa55ef8&"
         )
         self.enable_all_items()
         button.disabled = True
@@ -741,7 +748,7 @@ class OfficerOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147617186584735918/STAR_WARSTM_BattlefrontTM_II-40e39f0a-075a-40cd-a631-498618bf6a08.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716808933572710/Officer.png?ex=663ca91a&is=663b579a&hm=720d12493a9505d9620d7760649d8a326eb400b00ed9a935391f467bf99c0f19&"
         )
         self.enable_all_items()
         button.disabled = True
@@ -787,7 +794,7 @@ class SpecialistOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147617519725711380/Scout_Trooper.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716769657978970/Marksman.png?ex=663ca911&is=663b5791&hm=7f0ee1d1b8ce1f7608cba321cf107434c208d61ee0a941ba91679bb93e366a1e&"
         )
         view = MarksmanOptions()
         await interaction.response.edit_message(embed=embed, view=view)
@@ -820,7 +827,7 @@ class MarksmanOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147612340485886052/STAR_WARSTM_BattlefrontTM_II-f8859729-4be0-4247-a9f8-2a5624485571.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716809826959400/specialist.png?ex=663ca91b&is=663b579b&hm=71b0e2b13f874bf7f0abcb3784573f26ca11e51a8cdfaa0a3c98651c680b1a17&"
         )
         view = SpecialistOptions()
         await interaction.response.edit_message(embed=embed, view=view)
@@ -866,7 +873,7 @@ class HeavyPageOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147617610112978965/Star_Wars_Battlefront_II_2017_Screenshot_2022.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716765576925286/AA.png?ex=663ca910&is=663b5790&hm=cbb0a374b5f72ad8b71eecf8bf9c1eff663960f964a11d03a09a2ec771b02697&"
         )
         view = AntiArmourOptions()
         await interaction.response.edit_message(embed=embed, view=view)
@@ -901,7 +908,7 @@ class AntiArmourOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147612191269335100/STAR_WARSTM_BattlefrontTM_II-c849770d-db02-44f3-9642-67df0679c49d.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716769217581159/heavy.png?ex=663ca911&is=663b5791&hm=208345ca08dff585dcaeee55aadb569b12fc711501d76c4ea097deaf71ea4c56&"
         )
         view = HeavyPageOptions()
         await interaction.response.edit_message(embed=embed, view=view)
@@ -928,7 +935,7 @@ class AntiArmourOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147617695370584064/image1.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716810489397338/TX.png?ex=663ca91b&is=663b579b&hm=1449e22769e1ab90704e0dda6543a0f40506a632c68dc5133a1108269dd6e4b2&"
         )
         view = TX130Options()
         await interaction.response.edit_message(embed=embed, view=view)
@@ -962,7 +969,7 @@ class TX130Options(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147617610112978965/Star_Wars_Battlefront_II_2017_Screenshot_2022.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716765576925286/AA.png?ex=663ca910&is=663b5790&hm=cbb0a374b5f72ad8b71eecf8bf9c1eff663960f964a11d03a09a2ec771b02697&"
         )
         view = AntiArmourOptions()
         await interaction.response.edit_message(embed=embed, view=view)
@@ -993,7 +1000,7 @@ class RiflemanPageOptions(discord.ui.View):
             inline=False,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147611935454535690/STAR_WARSTM_BattlefrontTM_II-85e9bc00-5d94-4163-a5e4-aaa872d7c0ce.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716767892176987/assault.png?ex=663ca911&is=663b5791&hm=d2c1f39c27a53c293108798e9e92bce2b02ff087226b97e5469ae9b15f4cbdb0&"
         )
         view = AssaultPageOptions()
 
@@ -1040,7 +1047,7 @@ class AssaultPageOptions(discord.ui.View):
             """,
         )
         embed.set_image(
-            url="https://cdn.discordapp.com/attachments/702992440935579669/1147617758247399545/RIfleman.png"
+            url="https://cdn.discordapp.com/attachments/1237716605618749490/1237716809369784401/Rifleman.png?ex=663ca91b&is=663b579b&hm=a5f7bddf9bdc79d11ced253ecd22652342f77f38e0010ee93c6d3d2421fd7317&"
         )
 
         await interaction.response.edit_message(embed=embed, view=RiflemanPageOptions())
@@ -1712,22 +1719,6 @@ class Info(commands.Cog):
         )
         embed.set_footer(text="104th Battalion Milsim")
         view = MainButtonsView()
-        view.add_item(
-            discord.ui.Button(
-                emoji="<:mainserver:1212327738816593970>",
-                style=discord.ButtonStyle.grey,
-                url="https://www.104thbattalionmilsim.com/",
-                row=2,
-            )
-        )
-        view.add_item(
-            discord.ui.Button(
-                emoji="<:insta:1212314299704283206>",
-                style=discord.ButtonStyle.grey,
-                url="https://www.instagram.com/104th_battalion_milsim_media/",
-                row=2,
-            )
-        )
         await ctx.send(embed=embed, view=view)
 
 
