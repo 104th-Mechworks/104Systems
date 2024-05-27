@@ -94,7 +94,7 @@ class ResilientPatch(commands.Cog):
         if ctx.channel.id == 1198379774180081702:
             m = await ctx.send("Resetting staff roles...\n*This may take a while*")
             xbsr = await fetch_or_get_role(ctx.guild, 1198379771046920285)
-            wor  = await fetch_or_get_role(ctx.guild, 1198379771193737328)
+            wor   = await fetch_or_get_role(ctx.guild, 1198379771193737328)
             XSM = [member for member in ctx.guild.members if (xbsr in member.roles) and (wor in member.roles)]
             roles = await self.load_roles(ctx.guild)
             roles_dict = {i: [] for i in range(16)}  # Initialize dictionary with keys 0 to 15
