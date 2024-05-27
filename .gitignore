@@ -168,7 +168,7 @@ testing.ipynb
 .icons/
 .icons
 bans.json
-.dev/
+dev/
 .dev
 temp.py
-temp.py
+main.sqlite
