@@ -95,6 +95,7 @@ file_format = logging.Formatter(
     style="{",
     datefmt="%d-%m-%y %H:%M:%S",
 )
+
 file_handler = logging.FileHandler(log_path, "a")
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(file_format)
