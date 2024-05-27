@@ -60,6 +60,12 @@ class ColoredFormatter(Formatter):
 
         return colored(record.levelname, clr) + ": " + message
 
+dblogger = logging.getLogger("Database")
+dbhandler = StreamHandler()
+dbformatter = ColoredFormatter()
+dbhandler.setFormatter(dbformatter)
+dblogger.addHandler(dbhandler)
+
 
 logger = logging.getLogger("Datacore")
 handler = StreamHandler()

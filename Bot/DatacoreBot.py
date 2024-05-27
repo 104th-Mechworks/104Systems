@@ -92,6 +92,10 @@ class DatacoreBot(commands.Bot):
             )
             await self.read_nodes()
             self.first_start = False
+            self.status = discord.Status.dnd
+            self.activity = discord.Activity(
+                type=discord.ActivityType.watching, name=f"{len(self.guilds)}: Servers"
+            )
 
     async def on_command_error(self, ctx: commands.Context, exception) -> None:
         if isinstance(exception, errors.CommandNotFound):

@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import re
 from typing import Literal, Optional
 
 import discord
@@ -15,6 +16,27 @@ log = logging.getLogger("Datacore")
 log.setLevel("DEBUG")
 
 # bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
+def normalize_date(date_str: str) -> str:
+    """
+    Normalize a date string to the format %d-%m-%Y
+    """
+    # Split the date string into day, month, and year components
+    day, month, year = date_str.replace('/', '-').replace('.', '-').split('-')
+
+    # Add leading zeros to day and month if necessary
+    day = day.zfill(2)
+    month = month.zfill(2)
+
+    # Check if the year is 2 digits and adjust accordingly
+    if len(year) == 2:
+        current_year = datetime.datetime.now().year
+        if int(year) <= current_year % 100:
+            year = str(current_year - (current_year % 100) + int(year))
+        else:
+            year = str(current_year - (current_year % 100) - 100 + int(year))
+
+    # Return the normalized date string
+    return f"{day}-{month}-{year}"
 
 
 async def fetch_or_get_role(guild: discord.Guild, role_id: int):
@@ -47,7 +69,7 @@ def date_check(input_date: str, mode: Optional[Literal["s", "e"]] = None):
         return "Invalid date"
     else:
         if mode == "s":
-            if search_date > datetime.datetime.today():
+            if search_date < datetime.datetime.today():
                 return "Invalid date"
         elif mode == "e":
             if search_date > datetime.datetime.now() + relativedelta(months=3):
@@ -126,16 +148,30 @@ class MedbayRequestModal(discord.ui.Modal):
             self.children[2].value,
         ]
 
+        if re.match(r"^(\d{1,2})([./-])(\d{1,2})([./-])(\d{2,4})$", values[0]):
+            values[0] = normalize_date(values[0])
+
+        if re.match(r"^(\d{1,2})([./-])(\d{1,2})([./-])(\d{2,4})$", values[1]):
+            values[1] = normalize_date(values[1])
+
         if date_check(values[0], "s") == "Invalid date":
             await interaction.response.send_message(
                 "Invalid start date\nmake sure its day then month then year. (e.g 01-09-2023)",
                 ephemeral=True,
             )
             return
-        elif date_check(values[1]) == "Invalid date":
+        if date_check(values[1]) == "Invalid date":
             await interaction.response.send_message(
                 "Invalid end date\nmake sure its day then month then year. (e.g 01-09-2023)",
                 ephemeral=True,
+            )
+            return
+
+        stdt = datetime.datetime.strptime(values[0], "%d-%m-%Y")
+        endt = datetime.datetime.strptime(values[1], "%d-%m-%Y")
+        if stdt > endt:
+            await interaction.response.send_message(
+                "Start date is after end date", ephemeral=True
             )
             return
 

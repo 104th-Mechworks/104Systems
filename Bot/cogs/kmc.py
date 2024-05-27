@@ -41,6 +41,16 @@ def role_select(ctx: discord.AutocompleteContext):
                 "RC Candidate", "Republic Commando", "RC Instructor", "RC Cadre", "Head RC Cadre"
                     ]
 
+async def fetch_or_get_role(ctx: commands.Context | discord.ApplicationContext, role: int) -> discord.Role | None:
+    if ctx.guild.get_role(role) is not None:
+        return ctx.guild.get_role(role)
+    else:
+        try:
+            r = await ctx.guild._fetch_role(role)
+            if r:
+                return r
+        except discord.errors.NotFound:
+            return None
 
 
 class KMC(commands.Cog):
@@ -48,6 +58,19 @@ class KMC(commands.Cog):
         self.bot = bot
 
     kmc = discord.SlashCommandGroup("kmc", guild_only=True)
+
+    @kmc.command()
+    async def purge(self, ctx: discord.ApplicationContext):
+        c1 = ctx.guild.get_role()
+        async for member in ctx.guild.fetch_members(limit=None):
+            if member.bot:
+                continue
+            if member.roles == [c1, c2, c3]:
+                k = check_kmc_kicks(member)
+                if k == 3:
+                    await member.ban(reason="KMC Purge")
+                else:
+
 
     @kmc.command()
     @option(name="path", description="Pathway", choices=["Anti-Armour", "Rifleman", "Marksman", "ARC", "RC"])

@@ -374,6 +374,12 @@ class Data(commands.Cog):
         if rnd[7] is not None:
             rnd_embed.add_field(name="Attendance", value=rnd[7], inline=False)
         rnd_embed.set_thumbnail(url=member.avatar.url)
+        await ctx.respond(embed=rnd_embed)
+        return
+
+        """
+        code below teporarily disabled
+        """
 
         cshop_embed = discord.Embed(title=f"{display_name} C-Shop Info", color=colour)
         if cshop is None:
@@ -419,31 +425,32 @@ class Data(commands.Cog):
         Due to ongoing changes and restructuring.
         Will be added back with relevant changes once final structure hans been
         decided by RAS Vanguard staff.
+        Similarly with the KMC feature.
         """
-        page_groups = []
-        rnd_page = PageGroup(
-            pages=[rnd_embed], label="Main Info Page", use_default_buttons=False
-        )
-        # cshop_page = PageGroup(
-        #     pages=[cshop_embed], label="C-Shop Info Page", use_default_buttons=False
+        # page_groups = []
+        # rnd_page = PageGroup(
+        #     pages=[rnd_embed], label="Main Info Page", use_default_buttons=False
         # )
-        kmc_page = PageGroup(
-            pages=[kmc_embed], label="KMC Info Page", use_default_buttons=False
-        )
-        page_groups.append(rnd_page)
-        # page_groups.append(cshop_page)
-        page_groups.append(kmc_page)
-
-        paginator = Paginator(
-            pages=page_groups,
-            use_default_buttons=False,
-            show_indicator=False,
-            show_menu=True,
-            show_disabled=False,
-            timeout=300,
-            menu_placeholder="Select a Request",
-        )
-        await paginator.respond(ctx.interaction)
+        # # cshop_page = PageGroup(
+        # #     pages=[cshop_embed], label="C-Shop Info Page", use_default_buttons=False
+        # # )
+        # kmc_page = PageGroup(
+        #     pages=[kmc_embed], label="KMC Info Page", use_default_buttons=False
+        # )
+        # page_groups.append(rnd_page)
+        # # page_groups.append(cshop_page)
+        # page_groups.append(kmc_page)
+        #
+        # paginator = Paginator(
+        #     pages=page_groups,
+        #     use_default_buttons=False,
+        #     show_indicator=False,
+        #     show_menu=True,
+        #     show_disabled=False,
+        #     timeout=300,
+        #     menu_placeholder="Select a Page",
+        # )
+        # await paginator.respond(ctx.interaction)
 
     @data.command(
         name="name_check",

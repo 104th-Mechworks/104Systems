@@ -164,7 +164,7 @@ class Attendance(commands.Cog):
             color=discord.Color.red(),
             timestamp=datetime.datetime.utcnow(),
         ).set_footer(
-            text=f"{ctx.user.display_name}", icon_url=f"{ctx.user.guild_avatar.url}"
+            text=f"{ctx.user.display_name}"
         )
 
         resetEmbed = discord.Embed(
@@ -173,60 +173,62 @@ class Attendance(commands.Cog):
             color=discord.Color.green(),
             timestamp=datetime.datetime.utcnow(),
         ).set_footer(
-            text=f"{ctx.user.display_name}", icon_url=f"{ctx.user.guild_avatar.url}"
+            text=f"{ctx.user.display_name}"
         )
 
-        db, cursor = await connect_to_db("main.sqlite")
-        await cursor.execute(
-            f"SELECT attwatchrole FROM ServerConfig WHERE ID = {ctx.guild.id}"
-        )
-        roleID = await cursor.fetchone()
-
-        await cursor.execute(
-            f"SELECT AchannelID FROM ServerConfig WHERE ID = {ctx.guild.id}"
-        )
-        channelID = await cursor.fetchone()
-        achannel = ctx.guild.get_channel(channelID[0])
-        if achannel is None:
-            achannel = await ctx.guild.fetch_channel(channelID[0])
-        msg = await achannel.send(embed=resettingEmbed)
-        role = ctx.guild.get_role(roleID[0])
-        if role is None:
-            role = await ctx.guild._fetch_role(roleID[0])
-
-        members = []
-        attendance_result = ResetJSONManager()
-
-        for member in ctx.guild.members:
-            if role in member.roles:
-                members.append(member)
-
-        for member in members:
+        async with aiosqlite.connect("main.sqlite") as db:
             async with db.execute(
-                f"""
-                SELECT attendanceNum AS old_attendanceNum
-                FROM attendance
-                WHERE ID = {member.id}
-                LIMIT 1
-            """
+                    f"SELECT attwatchrole FROM ServerConfig WHERE ID = {ctx.guild.id}"
             ) as cursor:
-                previous_value = await cursor.fetchone()
-            await db.execute(
-                f"""
-                UPDATE attendance
-                SET attendanceNum = 0
-                WHERE ID = {member.id}
-            """
-            )
-            if previous_value is None:
-                continue
+                roleID = await cursor.fetchone()
 
-            # Commit the changes
-            await db.commit()
-            attendance_result.add(previous_value[0], member.display_name)
+            async with db.execute(
+                    f"SELECT AchannelID FROM ServerConfig WHERE ID = {ctx.guild.id}"
+            ) as cursor:
+                channelID = await cursor.fetchone()
 
-        await cursor.close()
-        await db.close()
+            achannel = ctx.guild.get_channel(channelID[0])
+            if achannel is None:
+                achannel = await ctx.guild.fetch_channel(channelID[0])
+
+            msg = await achannel.send(embed=resettingEmbed)
+
+            role = ctx.guild.get_role(roleID[0])
+            if role is None:
+                role = await ctx.guild._fetch_role(roleID[0])
+
+            members = []
+            attendance_result = ResetJSONManager()
+
+            for member in ctx.guild.members:
+                if role in member.roles:
+                    members.append(member)
+
+            for member in members:
+                async with db.execute(
+                        f"""
+                    SELECT attendanceNum AS old_attendanceNum
+                    FROM attendance
+                    WHERE ID = {member.id}
+                    LIMIT 1
+                """
+                ) as cursor:
+                    previous_value = await cursor.fetchone()
+
+                await db.execute(
+                    f"""
+                    UPDATE attendance
+                    SET attendanceNum = 0
+                    WHERE ID = {member.id}
+                """
+                )
+                await db.commit()
+                if previous_value is None:
+                    continue
+
+                # Commit the changes
+
+                attendance_result.add(previous_value[0], member.display_name)
         await ctx.respond("Reset attendance for all members in the server")
         # logger.success(f"Attendance Reset: {ctx.guild.name}")
         embed = reset_embed_generator(attendance_result.sort().get_obj())
@@ -244,15 +246,15 @@ class Attendance(commands.Cog):
 
         :param member: discord.Member - The member to view the attendance of
         """
-        db, cursor = await connect_to_db("main.sqlite")
         if member is None:
             member = ctx.author
-        await cursor.execute(
-            f"SELECT attendanceNum FROM attendance WHERE ID = {member.id}"
-        )
-        result = await cursor.fetchone()
-        await cursor.close()
-        await db.close()
+
+        async with aiosqlite.connect("main.sqlite") as db:
+            async with db.execute(
+                    f"SELECT attendanceNum FROM attendance WHERE ID = {member.id}"
+            ) as cursor:
+                result = await cursor.fetchone()
+
         if result is None:
             await ctx.respond(
                 f"{member.display_name} not in database. Run `/data add` to add them"
