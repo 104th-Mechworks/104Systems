@@ -170,5 +170,5 @@ testing.ipynb
 bans.json
 dev/
 .dev
-temp.py
+api.json
 main.sqlite

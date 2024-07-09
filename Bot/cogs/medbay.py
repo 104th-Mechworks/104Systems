@@ -1046,6 +1046,15 @@ class Medbay(commands.Cog):
         )
         return
 
+    @commands.command()
+    async def emb(ctx: commands.Context):
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name}",
+            description=f"dark special thing",
+            color=discord.Color.from_rgb(200, 200, 200)
+        )
+        embed.add_field(name="Rank", value=f"{ctx.author.top_role}")
+
 
 def setup(bot: DatacoreBot):
     bot.add_cog(Medbay(bot))

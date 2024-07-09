@@ -20,7 +20,7 @@ bot = DatacoreBot(
     activity=discord.Activity(
         type=discord.ActivityType.custom, name="Maintenance..."
     ),
-    status=discord.Status.idle,
+    status=discord.Status.dnd,
 )
 
 # function to load all cogs before bot starts

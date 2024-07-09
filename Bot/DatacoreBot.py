@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 
-# import os
+import os
 from contextlib import suppress
 
 import aiohttp
@@ -24,6 +24,13 @@ intents = discord.Intents.all()
 log.setLevel(logging.DEBUG)
 
 
+def get_db_path():
+    current_dir = os.path.dirname(__file__)
+    parent_dir = os.path.dirname(current_dir)
+    file_path = os.path.join(parent_dir, 'main.sqlite')
+    return file_path
+
+
 class DatacoreBot(commands.Bot):
     """
     Main Bot Class for the Datacore Bot, this handles start up and connection to the Lavalink nodes.
@@ -34,6 +41,7 @@ class DatacoreBot(commands.Bot):
         super().__init__(*args, **kwargs)
         self.first_start = True
         self.pool = pomice.NodePool()
+        self.DB_PATH = get_db_path()
 
     async def read_nodes(self):
         with open("lavalink.json", "r") as f:
