@@ -16,4 +16,4 @@ By using the Bot, the User agrees to be bound by the terms of this Agreement. If
 
 By using the Bot, the User acknowledges that they have read this Agreement, understand it, and agree to be bound by its terms and conditions.
 
-The above Privacy Policy is subject to change at any point without prior notice
+The above Terms of Service is subject to change at any point without prior notice
