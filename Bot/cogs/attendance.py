@@ -260,7 +260,7 @@ class Attendance(commands.Cog):
                 f"{member.display_name} not in database. Run `/data add` to add them"
             )
         else:
-            await ctx.respond(f"{member.display_name} has attended {result[0]} events")
+            await ctx.respond(f"{member.display_name} has attended {result[0]} events\n{ctx.interaction.locale}")
         return
 
     # debugging commands. These are not meant to be used in production
@@ -299,7 +299,7 @@ class Attendance(commands.Cog):
         await db.commit()
         await cursor.close()
         await db.close()
-        await ctx.reply("Member added to database", ephemeral=True)
+        await ctx.reply(f"Member added to database, {ctx.author.d}", ephemeral=True)
 
 
 def setup(bot: DatacoreBot):

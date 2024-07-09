@@ -3,7 +3,6 @@ import asyncio
 import discord
 from discord.ext import commands
 import logging
-import json
 from Bot.DatacoreBot import DatacoreBot
 from Bot.cogs.attendance import reset_embed_generator
 
@@ -77,7 +76,7 @@ class ResilientPatch(commands.Cog):
                     await member.add_roles(roles[11])
                     await member.remove_roles(roles[10])
                 elif roles[11] in member.roles:
-                    await member.add_roles(roles[10])
+                    await member.add_roles(roles[12])
                     await member.remove_roles(roles[11])
                 elif roles[12] in member.roles:
                     await member.add_roles(roles[13])
