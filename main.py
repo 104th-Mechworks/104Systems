@@ -62,7 +62,6 @@ if __name__ == "__main__":
 
     # load environment variables
     load_dotenv(".env")
-
     logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
     # load necessary files before bot starts
