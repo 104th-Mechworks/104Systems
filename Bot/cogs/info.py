@@ -1721,6 +1721,29 @@ class Info(commands.Cog):
         view = MainButtonsView()
         await ctx.send(embed=embed, view=view)
 
+    @discord.slash_command()
+    async def policies(self, ctx: discord.ApplicationContext):
+        view = discord.ui.View()
+        embed = discord.Embed(
+            title="**104th Datacore Bot**",
+            description="Here are useful links to the 104th Datacore Bot",
+            color=0x838181,
+        )
+        view.add_item(
+            discord.ui.Button(
+                style=discord.ButtonStyle.link,
+                label="Privacy Policy",
+                url="https://github.com/104th-Mechworks/104Systems/blob/main/PrivacyPolicy.md",
+            )
+        )
+        view.add_item(
+            discord.ui.Button(
+                style=discord.ButtonStyle.link,
+                label="Terms of Service",
+                url="https://github.com/104th-Mechworks/104Systems/blob/main/TOS.md"
+            )
+        )
+        await ctx.respond(embed=embed, view=view, delete_after=90)
 
 def setup(bot: DatacoreBot) -> None:
     bot.add_cog(Info(bot))
