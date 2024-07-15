@@ -10,18 +10,21 @@ load_dotenv()
 
 
 logger = logging.getLogger("Datacore")
+intents = discord.Intents.default()
+intents.members = True
 
 
 bot = DatacoreBot(
     command_prefix=".",
     case_insensitive=True,
     strip_after_prefix=True,
-    intents=discord.Intents.all(),
+    intents=intents,
     activity=discord.Activity(
         type=discord.ActivityType.custom, name="Maintenance..."
     ),
     status=discord.Status.dnd,
 )
+
 
 # function to load all cogs before bot starts
 def pre_start():
@@ -59,7 +62,6 @@ if __name__ == "__main__":
 
     # load environment variables
     load_dotenv(".env")
-
     logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
     # load necessary files before bot starts
