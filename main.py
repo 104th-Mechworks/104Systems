@@ -13,6 +13,7 @@ logger = logging.getLogger("Datacore")
 intents = discord.Intents.default()
 intents.members = True
 
+
 bot = DatacoreBot(
     command_prefix=".",
     case_insensitive=True,
