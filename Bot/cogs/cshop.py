@@ -84,7 +84,7 @@ class CShop(commands.Cog):
         self.bot = bot
 
     cshp = discord.SlashCommandGroup(
-        "cshop", description="CShop commands", guild_only=True
+        "cshop", description="CShop commands"
     )
 
     @cshp.command(name="add", description="Add a member to a cshop team")
