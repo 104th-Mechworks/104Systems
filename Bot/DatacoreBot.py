@@ -24,7 +24,7 @@ intents = discord.Intents.all()
 log.setLevel(logging.DEBUG)
 
 
-def get_db_path():
+def get_db_path() -> str:
     current_dir = os.path.dirname(__file__)
     parent_dir = os.path.dirname(current_dir)
     file_path = os.path.join(parent_dir, 'main.sqlite')

@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 
 import aiosqlite
 import discord
@@ -7,6 +8,31 @@ from discord.ext import commands
 from Bot.DatacoreBot import DatacoreBot
 from Bot.utils.logger import logger as log
 from Bot.utils.DB import connect_to_db, close_db
+
+
+
+def createResetFile(json_obj):
+    """
+    create a file to store the reset data with the format:
+    Attendance: 0
+    member1
+    member2
+
+    Attendance: 1
+    ...
+    """
+    with open("reset.txt", "w") as f:
+        for key, value in json_obj.items():
+            f.write(f"Attendance: {key}\n")
+            for member in value:
+                f.write(f"{member}\n")
+            f.write("\n")
+    return os.path.abspath("reset.txt")
+
+
+
+
+
 
 
 class ResetJSONManager:
@@ -65,7 +91,7 @@ def reset_embed_generator(json_obj) -> discord.Embed:
 
 
 class Attendance(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: DatacoreBot):
         self.bot = bot
 
     @commands.command(name="attendance")
@@ -115,7 +141,7 @@ class Attendance(commands.Cog):
             return
 
     att = discord.SlashCommandGroup(
-        name="attendance", description="Commands for attendance", guild_only=True
+        name="attendance", description="Commands for attendance"
     )
 
     @att.command(name="setup", description="Sets up attendance for the server")
@@ -149,9 +175,11 @@ class Attendance(commands.Cog):
             f"Updated {ctx.guild.name} attendance channel and role", ephemeral=True
         )
 
+
     @att.command(
         name="reset", description="Resets attendance for members in the server"
     )
+    @commands.has_permissions(manage_roles=True)
     async def _reset(self, ctx: discord.ApplicationContext):
         """
         resets attendance for all members in the server with the specified role from the setup command
@@ -231,8 +259,19 @@ class Attendance(commands.Cog):
                 attendance_result.add(previous_value[0], member.display_name)
         await ctx.respond("Reset attendance for all members in the server")
         # logger.success(f"Attendance Reset: {ctx.guild.name}")
-        embed = reset_embed_generator(attendance_result.sort().get_obj())
-        await ctx.respond(embed=embed)
+        json_obj = attendance_result.sort().get_obj()
+        embed = reset_embed_generator(json_obj)
+
+        await msg.edit(embed=resetEmbed)
+        try:
+            await ctx.respond(embed=embed)
+        except discord.HTTPException:
+            await ctx.respond("Too many members to display", ephemeral=True)
+             # create a file to store the reset data, send the file then delete the file on the machine
+            createResetFile(json_obj)
+            await ctx.respond(file=discord.File("reset.txt"))
+
+            os.remove("reset.txt")
         await msg.edit(embed=resetEmbed)
         log.success(f"Attendance Reset: {ctx.guild.name}")
         return
@@ -260,7 +299,7 @@ class Attendance(commands.Cog):
                 f"{member.display_name} not in database. Run `/data add` to add them"
             )
         else:
-            await ctx.respond(f"{member.display_name} has attended {result[0]} events\n{ctx.interaction.locale}")
+            await ctx.respond(f"{member.display_name} has attended {result[0]} events", ephemeral=True)
         return
 
     # debugging commands. These are not meant to be used in production
@@ -300,6 +339,23 @@ class Attendance(commands.Cog):
         await cursor.close()
         await db.close()
         await ctx.reply(f"Member added to database, {ctx.author.d}", ephemeral=True)
+
+
+    @commands.is_owner()
+    @commands.command()
+    async def mset(self, ctx: commands.Context):
+        async with aiosqlite.connect(self.bot.DB_PATH) as db:
+            async with db.cursor() as cursor:
+                for member in ctx.guild.members:
+                    await cursor.execute(
+                        f"INSERT IGNORE INTO Members (ID) VALUES ({member.id})"
+                    )
+                    await cursor.execute(
+                        f"INSERT INTO attendance (ID, attendanceNum) VALUES ({member.id}, 0)"
+                    )
+                await db.commit()
+
+        await ctx.reply("Members added to database", ephemeral=True)
 
 
 def setup(bot: DatacoreBot):

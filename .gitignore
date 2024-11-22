@@ -172,4 +172,6 @@ dev/
 .dev
 api.json
 main.sqlite
-IntentsVerify/
+.dev/IntentsVerify/
+medbayV3.py
+/Bot/cogs/medbayV3.py

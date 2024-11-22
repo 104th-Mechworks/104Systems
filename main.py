@@ -10,7 +10,10 @@ load_dotenv()
 
 
 logger = logging.getLogger("Datacore")
+
+# intents for verification
 intents = discord.Intents.default()
+intents.message_content = True
 intents.members = True
 
 
@@ -30,10 +33,12 @@ bot = DatacoreBot(
 def pre_start():
     # bot.load_extensions("Bot.cogs", recursive=True)
     cogdir = os.path.join(os.path.dirname(__file__), "Bot", "cogs")
+
     for cog in os.listdir(cogdir):
         if cog.endswith(".py"):
             try:
                 bot.load_extension(f"Bot.cogs.{cog[:-3]}")
+                logger.debug(f"loaded cog: {cog[:-3]}")
             except Exception as e:
                 logger.error(f"Failed to load cog {cog[:-3]}: {e}")
 
@@ -68,5 +73,5 @@ if __name__ == "__main__":
     pre_start()
 
     # Starts the bot and connects to Discord API
-    bot.run(os.getenv("MAIN_TOKEN" if not debug else "DEBUG_TOKEN"))
+    bot.run(os.getenv("MAIN_TOKEN" if not debug else "DMAIN_TOKEN"))
 

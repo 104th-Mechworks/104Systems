@@ -225,7 +225,7 @@ class Data(commands.Cog):
         self.bot = bot
 
     data = discord.SlashCommandGroup(
-        name="data", description="Data commands", guild_only=True
+        name="data", description="Data commands"
     )
 
     @data.command(name="add", description="Add data to the database")
@@ -612,6 +612,19 @@ class Data(commands.Cog):
         with open(f"{s}roles.json", "w") as f:
             json.dump(roles, f, indent=4)
             return
+        
+
+    @commands.is_owner()
+    @commands.command()
+    async def stage(self, ctx: commands.Context):
+        overwrites = {
+            ctx.author: discord.PermissionOverwrite(
+                        view_channel=True, manage_channels=True, manage_permissions=True
+                    )
+        }
+        category = await ctx.guild.fetch_channel(1004857679652585603)
+        await ctx.guild.create_stage_channel(name="Unit Updates", category=category, overwrites=overwrites, topic="Unit Updates")
+
 
 
 
