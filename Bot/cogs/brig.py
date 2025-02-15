@@ -5,6 +5,17 @@ import fitz
 from pylatex import Command, Document, Tabular, Package, PageStyle, Foot, Figure
 from pylatex.utils import NoEscape, bold
 from Bot.DatacoreBot import DatacoreBot
+from enum import Enum
+
+
+class ActionEnum(Enum):
+    P = "Promotion"
+    S = "Suspend"
+    K = "Kick"
+    B = "Ban"
+    D = "Demotion"
+
+
 
 
 
@@ -13,7 +24,10 @@ image_filename = os.path.join(os.path.dirname(__file__), "images", "RAS.png")
     # Document with `\maketitle` command activated
 
 
-def dp_action_form(vcref_number: str, staff_member: str, member: discord.Member, action: str, reason: str):
+
+
+
+def dp_action_form(vcref_number: str, staff_member: str, member: discord.Member | str, action: str, reason: str):
     filepath = os.path.join(os.path.dirname(__file__), "VCL", f"{vcref_number}")
     doc = Document()
     doc.packages.append(Package('xcolor'))
@@ -30,6 +44,8 @@ def dp_action_form(vcref_number: str, staff_member: str, member: discord.Member,
     with doc.create(Figure(position="h!")) as logo:
         logo.add_image(image_filename, width="100px")
 
+    member_name = member.display_name if type(member) == discord.Member else str(member)
+
     doc.append(Command('centering'))
     with doc.create(Tabular("|l|p{6cm}|", width=2, row_height=1.2)) as table:
         table.add_hline()
@@ -37,13 +53,13 @@ def dp_action_form(vcref_number: str, staff_member: str, member: discord.Member,
         table.add_hline()
         table.add_row((bold("Case Ref Number"), vcref_number))
         table.add_hline()
-        table.add_row((bold("Classification Level"), NoEscape(r"\textcolor{red}{None}")))
+        table.add_row((bold("Classification Level"), NoEscape(r"\textcolor{red}")))
         table.add_hline()
         table.add_row((bold("Staff Member"), staff_member))
         table.add_hline()
-        table.add_row((bold("Member Name"), member.display_name))
+        table.add_row((bold("Member Name"), member_name))
         table.add_hline()
-        table.add_row((bold("Member ID"), member.display_name))
+        table.add_row((bold("Member ID"), member_name))
         table.add_hline()
         table.add_row((bold("Action Taken"), action))
         table.add_hline()
@@ -69,6 +85,27 @@ def dp_action_form(vcref_number: str, staff_member: str, member: discord.Member,
     doc.close()
     with open(f"{filepath}.png", 'wb') as f:
         f.write(img)
+
+
+def setup(bot):
+    bot.add_cog(Brig(bot))
+
+
+if __name__ == "__main__":
+    dp_action_form(
+        vcref_number="0004",
+        staff_member="Staff Memebr",
+        member="Member",
+        action="Disciplinary Action",
+        reason="Test"
+    )
+
+
+
+
+
+
+
 
 
 
@@ -101,6 +138,3 @@ class Brig(commands.Cog):
         server = await self.bot.fetch_guild(667872108810076160)
         for channel in server.channels:
             print(f"{channel.name} | {channel.id}")
-
-def setup(bot):
-    bot.add_cog(Brig(bot))

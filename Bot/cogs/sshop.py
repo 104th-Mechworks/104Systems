@@ -21,4 +21,4 @@ class AdminList(discord.ui.View):
         embed.add_field(name="Admin 2", value="Admin 2")
         embed.add_field(name="Admin 3", value="Admin 3")
         await interaction.response.send_message(embed=embed, ephemeral=True)
-        self.stop()
+
